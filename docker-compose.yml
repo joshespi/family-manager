@@ -6,7 +6,7 @@ services:
     networks:
       - famman_network
     ports:
-      - "8080:80"
+      - "8040:80"
     volumes:
       - ./src:/var/www/html
     environment:
@@ -40,7 +40,7 @@ services:
       - famman_network
     restart: always
     ports:
-      - "8081:80"
+      - "8045:80"
     environment:
       PMA_HOST: ${DB_HOST}
       PMA_USER: ${DB_USER}
