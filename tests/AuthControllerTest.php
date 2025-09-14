@@ -92,7 +92,7 @@ class AuthControllerTest extends TestCase
 
     public function testCreateSubAccount()
     {
-        // create a parent user with 'create_sub' permission
+        // create a parent user with 'parent_user' permission
         $parentUsername = 'parent_' . uniqid();
         $parentPassword = 'ParentPass123';
         $parentRole = 'parent';

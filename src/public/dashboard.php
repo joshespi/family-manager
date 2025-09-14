@@ -34,7 +34,7 @@ if (
 
 // Fetch sub-accounts if user has permission
 $subAccounts = [];
-if (in_array('create_sub', $userPermissions['permissions'])) {
+if (in_array('parent_user', $userPermissions['permissions'])) {
     $subAccounts = User::getSubAccounts($_SESSION['user_id']);
 }
 

@@ -71,9 +71,10 @@ class User
 
         $permissions = [];
         if ($role === 'parent' || $role === 'user') {
-            $permissions[] = 'create_sub'; // Can create sub-accounts
+            $permissions[] = 'parent_user';  // Full access to family management
         }
         if ($role === 'child') {
+            $permissions[] = 'child_user';    // Limited access
         }
 
         return [

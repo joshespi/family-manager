@@ -65,7 +65,7 @@ class UserModelTest extends TestCase
         $user = User::findByUsername('permuser');
         $perms = User::getPermissions($user['id']);
         $this->assertEquals('parent', $perms['role']);
-        $this->assertContains('create_sub', $perms['permissions']);
+        $this->assertContains('parent_user', $perms['permissions']);
     }
     public function testGetSubAccountsReturnsChildrenAndSiblings()
     {

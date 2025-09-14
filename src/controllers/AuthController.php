@@ -58,7 +58,7 @@ class AuthController
     {
         $creator = User::findById($creatorId);
         $creatorPerms = User::getPermissions($creatorId);
-        if (!$creator || !in_array('create_sub', $creatorPerms['permissions'])) {
+        if (!$creator || !in_array('parent_user', $creatorPerms['permissions'])) {
             return ['success' => false, 'message' => 'Only parents can create sub-accounts.'];
         }
         if (!in_array($role, ['parent', 'child'])) {
