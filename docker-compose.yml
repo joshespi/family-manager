@@ -35,7 +35,7 @@ services:
       - ./db_data:/var/lib/mysql
 
   famman_phpmyadmin:
-    image: phpmyadmin/phpmyadmin
+    image: phpmyadmin:latest
     networks:
       - famman_network
     restart: always
