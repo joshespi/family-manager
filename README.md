@@ -37,6 +37,3 @@ Access phpmyadmin in your browser at `http://localhost:8081`
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for enhancements
-
-
-test
