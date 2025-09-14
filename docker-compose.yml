@@ -1,0 +1,54 @@
+services:
+  famman_web:
+    build:
+      context: .
+      dockerfile: php.Dockerfile
+    networks:
+      - famman_network
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+      - APP_VERSION=0.0.1
+      - DEV_MODE=${DEV_MODE}
+    restart: always
+    depends_on:
+      - famman_db
+  famman_db:
+   image: mariadb:11.3
+   restart: always
+   environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASS}
+   networks:
+      - famman_network
+   ports:
+      - "33306:3306"
+   volumes:
+      - ./db_data:/var/lib/mysql
+
+  famman_phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    networks:
+      - famman_network
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: ${DB_HOST}
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASS}
+    depends_on:
+      - famman_db
+volumes:
+  db_data:
+networks:
+  famman_network:
+    driver: bridge
