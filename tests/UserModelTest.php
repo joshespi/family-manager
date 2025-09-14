@@ -8,6 +8,12 @@ use App\Models\User;
 
 class UserModelTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        $pdo = Database::getConnection();
+        // Clear users table before each test (adjust table name if needed)
+        $pdo->exec("DELETE FROM users");
+    }
     public function testPasswordIsHashedOnRegistration()
     {
         $userModel = new User();
