@@ -31,6 +31,13 @@ class AuthController
         if (empty($username) || empty($password)) {
             return ['success' => false, 'message' => 'Username and password cannot be empty.'];
         }
+        $allowedRoles = ['user', 'admin', 'parent', 'child'];
+        if (!in_array($role, $allowedRoles)) {
+            return [
+                'success' => false,
+                'message' => 'Invalid role specified.'
+            ];
+        }
         $validation = User::validateCredentials($username, $password);
         if (!$validation['success']) {
             return $validation;
