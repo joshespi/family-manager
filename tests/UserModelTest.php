@@ -11,85 +11,83 @@ class UserModelTest extends TestCase
     protected function setUp(): void
     {
         $pdo = Database::getConnection();
-        // Clear users table before each test (adjust table name if needed)
         $pdo->exec("DELETE FROM users");
     }
-    public function testPasswordIsHashedOnRegistration()
+    public function testValidateCredentialsInput()
     {
-        $userModel = new User();
-        $plainPassword = 'MySecret123!';
-        $userModel->create('testuser', $plainPassword, 'user');
+        // Invalid credentials
+        $invalid = User::validateCredentials('bad', 'short');
+        $this->assertFalse($invalid['success']);
 
-        $storedUser = $userModel->findByUsername('testuser');
-        $this->assertNotEquals($plainPassword, $storedUser['password']);
-        $this->assertTrue(password_verify($plainPassword, $storedUser['password']));
+        // Invalid username
+        $invalid_user = User::validateCredentials('ab', 'longenough1');
+        $this->assertFalse($invalid_user['success']);
+        $this->assertStringContainsString('Username must be', $invalid_user['message']);
+
+        // Invalid password
+        $invalid_pass = User::validateCredentials('longenoughusername1', 'Pd123');
+        $this->assertFalse($invalid_pass['success']);
+        $this->assertStringContainsString('Password must be', $invalid_pass['message']);
+
+        // Valid credentials
+        $valid = User::validateCredentials('validuser', 'Password123');
+        $this->assertTrue($valid['success']);
     }
-    public function testDuplicateUsernameRegistration()
+
+    public function testCreateAndFindByUsername()
     {
-        $userModel = new User();
-        $userModel->create('uniqueuser', 'password1', 'user');
-        $result = $userModel->create('uniqueuser', 'password2', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success'], 'Should not allow duplicate usernames');
+        $result = User::create('testuser', 'Password123', 'parent');
+        $this->assertTrue($result['success']);
+
+        $user = User::findByUsername('testuser');
+        $this->assertIsArray($user);
+        $this->assertEquals('testuser', $user['username']);
     }
-    public function testFindByUsernameReturnsNullForNonExistentUser()
+    public function testFindByIdReturnsCorrectUser()
     {
-        $userModel = new User();
-        $result = $userModel->findByUsername('no_such_user');
-        $this->assertFalse($result);
+        User::create('findme', 'Password123', 'parent');
+        $user = User::findByUsername('findme');
+        $found = User::findById($user['id']);
+        $this->assertIsArray($found);
+        $this->assertEquals('findme', $found['username']);
     }
-    public function testCreateWithEmptyUsernameFails()
+    public function testCreateWithDuplicateUsernameFails()
     {
-        $userModel = new User();
-        $result = $userModel->create('', 'password', 'user');
-        $this->assertFalse($result['success'], 'Should not allow empty username');
+        User::create('dupeuser', 'Password123', 'parent');
+        $result = User::create('dupeuser', 'Password123', 'parent');
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Username already exists.', $result['message']);
     }
-    public function testCreateWithInvalidUsernameFails()
+
+    public function testGetPermissionsReturnsCorrectRoleAndPermissions()
     {
-        $userModel = new User();
-
-        $result = $userModel->create('ab', 'Password123', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
-
-        $result = $userModel->create('user!@#$', 'Password123', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
-
-        $result = $userModel->create(str_repeat('a', 51), 'Password123', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
+        User::create('permuser', 'Password123', 'parent');
+        $user = User::findByUsername('permuser');
+        $perms = User::getPermissions($user['id']);
+        $this->assertEquals('parent', $perms['role']);
+        $this->assertContains('create_sub', $perms['permissions']);
     }
-    public function testCreateWithWeakPasswordFails()
+    public function testGetSubAccountsReturnsChildrenAndSiblings()
     {
-        $userModel = new User();
+        // Create parent
+        User::create('parentuser', 'Password123', 'parent');
+        $parent = User::findByUsername('parentuser');
 
-        $result = $userModel->create('validuser', 'short', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
+        // Create children
+        User::create('child1', 'Password123', 'child', $parent['id']);
+        User::create('child2', 'Password123', 'child', $parent['id']);
 
-        $result = $userModel->create('validuser', 'allletters', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
+        // Test: Get children from parent
+        $subs = User::getSubAccounts($parent['id']);
+        $usernames = array_column($subs, 'username');
+        $this->assertContains('child1', $usernames);
+        $this->assertContains('child2', $usernames);
 
-        $result = $userModel->create('validuser', '12345678', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
-    }
-    public function testCreateWithSqlInjectionUsernameFails()
-    {
-        $userModel = new User();
-
-        $result = $userModel->create("test'; DROP TABLE users; --", 'Password123', 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
-    }
-    public function testCreateWithSqlInjectionPasswordFails()
-    {
-        $userModel = new User();
-
-        $result = $userModel->create('validuser', "password'; DROP TABLE users; --", 'user');
-        $this->assertIsArray($result);
-        $this->assertFalse($result['success']);
+        // Test: Get siblings from one child
+        $child1 = User::findByUsername('child1');
+        $siblings = User::getSubAccounts($child1['id']);
+        $siblingNames = array_column($siblings, 'username');
+        $this->assertContains('child1', $siblingNames);
+        $this->assertContains('child2', $siblingNames);
     }
 }

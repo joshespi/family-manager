@@ -74,7 +74,6 @@ class User
             $permissions[] = 'create_sub'; // Can create sub-accounts
         }
         if ($role === 'child') {
-            // Example: $permissions[] = 'view_tasks';
         }
 
         return [
