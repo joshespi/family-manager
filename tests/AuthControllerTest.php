@@ -11,7 +11,6 @@ class AuthControllerTest extends TestCase
     {
         $_SESSION = [];
         $pdo = Database::getConnection();
-        // Clear users table before each test (adjust table name if needed)
         $pdo->exec("DELETE FROM users");
     }
 
