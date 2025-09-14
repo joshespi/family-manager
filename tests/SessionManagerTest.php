@@ -9,9 +9,11 @@ class SessionManagerTest extends TestCase
     {
         // Set some session data
         $_SESSION['test'] = 'value';
-
         // Check if session data is set correctly
         $this->assertEquals('value', $_SESSION['test']);
+
+        SessionManager::set('foo', 'bar');
+        $this->assertEquals('bar', SessionManager::get('foo'));
 
         // Destroy the session
         SessionManager::destroy();
@@ -25,12 +27,11 @@ class SessionManagerTest extends TestCase
 
         $this->assertNotEmpty($token);
         $this->assertIsString($token);
-        $this->assertEquals(64, strlen($token)); // Default length for CSRF token
+        $this->assertEquals(64, strlen($token));
     }
     public function testCsrfTokenValidation()
     {
         $token = SessionManager::generateCsrfToken();
-        $_SESSION['csrf_token'] = $token;
 
         $this->assertTrue(SessionManager::validateCsrfToken($token));
         $this->assertFalse(SessionManager::validateCsrfToken('invalid_token'));
@@ -54,7 +55,7 @@ class SessionManagerTest extends TestCase
     }
     public function testDestroyWithoutActiveSession()
     {
-        SessionManager::destroy(); // Should not throw
+        SessionManager::destroy();
         $this->assertEmpty($_SESSION, "Session should remain empty after destroy with no active session.");
     }
     public function testCsrfTokenIsUnique()
@@ -77,6 +78,6 @@ class SessionManagerTest extends TestCase
     {
         SessionManager::destroy();
         $this->expectNotToPerformAssertions();
-        SessionManager::regenerate(); // Should not throw
+        SessionManager::regenerate();
     }
 }
