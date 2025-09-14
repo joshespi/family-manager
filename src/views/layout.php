@@ -31,7 +31,8 @@
         <p>&copy; <?= date('Y') ?> Family Manager</p>
     </footer>
     <?php
-    if ($_ENV['DEV_MODE'] == true) {
+    $devMode = filter_var($_ENV['DEV_MODE'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    if ($devMode) {
         echo '<div class="debug-info">';
         echo '<h3>Debug Info</h3>';
         echo '<pre>';
