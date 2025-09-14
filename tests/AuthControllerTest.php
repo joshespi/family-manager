@@ -4,6 +4,7 @@ require_once __DIR__ . '/../src/config/database.php';
 
 use PHPUnit\Framework\TestCase;
 use App\Controllers\AuthController;
+use App\Models\User;
 
 class AuthControllerTest extends TestCase
 {
@@ -87,5 +88,39 @@ class AuthControllerTest extends TestCase
         AuthController::logout();
         $this->assertFalse(AuthController::check());
         $this->assertEmpty($_SESSION, 'Session should be empty after logout.');
+    }
+
+    public function testCreateSubAccount()
+    {
+        // create a parent user with 'create_sub' permission
+        $parentUsername = 'parent_' . uniqid();
+        $parentPassword = 'ParentPass123';
+        $parentRole = 'parent';
+        $parentResult = AuthController::register($parentUsername, $parentPassword, $parentRole);
+        $this->assertTrue($parentResult['success']);
+
+        $parent = User::findByUsername($parentUsername);
+
+        // parent creates a child sub-account
+        $subUsername = 'child_' . uniqid();
+        $subPassword = 'ChildPass123';
+        $subRole = 'child';
+        $result = AuthController::createSubAccount($parent['id'], $subUsername, $subPassword, $subRole);
+        $this->assertIsArray($result);
+        $this->assertTrue($result['success']);
+
+        // non-parent (no permission) cannot create sub-account
+        $child = User::findByUsername($subUsername);
+
+        $result = AuthController::createSubAccount($child['id'], 'subuser1', $subPassword, 'child');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Only parents can create sub-accounts.', $result['message']);
+
+        // invalid role for sub-account
+        $result = AuthController::createSubAccount($parent['id'], 'subuser2', $subPassword, 'admin');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Invalid role for sub-account.', $result['message']);
     }
 }
