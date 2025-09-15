@@ -15,4 +15,6 @@ if (isset($permissions) && in_array('parent_user', $permissions)) {
 if (isset($permissions) && in_array('child_user', $permissions)) {
     include __DIR__ . '/roles/child.php';
 }
+echo '<hr>';
+include __DIR__ . '/tasks/index.php';
 ?>

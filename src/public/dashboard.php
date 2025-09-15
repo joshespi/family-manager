@@ -44,5 +44,6 @@ render('dashboard', [
     'message' => $message,
     'permissions' => $userPermissions['permissions'],
     'role' => $userPermissions['role'],
-    'subAccounts' => $subAccounts
+    'subAccounts' => $subAccounts,
+
 ]);
