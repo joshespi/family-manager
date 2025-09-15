@@ -3,9 +3,9 @@
 
 <head>
     <title><?= htmlspecialchars($title ?? 'App') ?> | Family Manager</title>
-    <link rel="stylesheet" href="/assets/css/reset.css?v=<?= htmlspecialchars($app_Version) ?>">
+    <!-- <link rel="stylesheet" href="/assets/css/reset.css?v=<?= htmlspecialchars($app_Version) ?>">
     <link rel="stylesheet" href="/assets/css/variables.css?v=<?= htmlspecialchars($app_Version) ?>">
-    <link rel="stylesheet" href="/assets/css/main.css?v=<?= htmlspecialchars($app_Version) ?>">
+    <link rel="stylesheet" href="/assets/css/main.css?v=<?= htmlspecialchars($app_Version) ?>"> -->
 </head>
 
 <body>
