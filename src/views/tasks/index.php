@@ -3,8 +3,10 @@
 use App\Controllers\TaskController;
 use App\Models\User;
 
+$pdo = Database::getConnection();
 $taskController = new TaskController($pdo);
 $tasks = $taskController->getAllTasks();
+
 
 if (empty($tasks)): ?>
     <p>No tasks available.</p>

@@ -10,7 +10,7 @@ if (!AuthController::check()) {
 }
 
 $userPermissions = User::getPermissions($_SESSION['user_id']);
-
+$pdo = Database::getConnection();
 
 // Handle sub user creation
 $message = '';
@@ -45,5 +45,6 @@ render('dashboard', [
     'permissions' => $userPermissions['permissions'],
     'role' => $userPermissions['role'],
     'subAccounts' => $subAccounts,
+    'pdo' => $pdo,
 
 ]);
