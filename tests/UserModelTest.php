@@ -11,6 +11,7 @@ class UserModelTest extends TestCase
     protected function setUp(): void
     {
         $pdo = Database::getConnection();
+        $pdo->exec("DELETE FROM tasks");
         $pdo->exec("DELETE FROM users");
     }
     public function testValidateCredentialsInput()
@@ -89,5 +90,56 @@ class UserModelTest extends TestCase
         $siblingNames = array_column($siblings, 'username');
         $this->assertContains('child1', $siblingNames);
         $this->assertContains('child2', $siblingNames);
+    }
+    public function testGetAllFamilyReturnsCorrectGrouping()
+    {
+        // Create a parent user
+        User::create('parentuser', 'Password123', 'user');
+        $parent = User::findByUsername('parentuser');
+
+        // Create children
+        User::create('child1', 'Password123', 'child', $parent['id']);
+        User::create('child2', 'Password123', 'child', $parent['id']);
+
+        // Test for parent role
+        $family = User::getAllFamily(Database::getConnection(), $parent['id']);
+        $usernames = array_column($family, 'username');
+        $this->assertContains('parentuser', $usernames);
+        $this->assertContains('child1', $usernames);
+        $this->assertContains('child2', $usernames);
+        $this->assertCount(3, $family);
+
+        // Test for child role
+        $child1 = User::findByUsername('child1');
+        $familyChild = User::getAllFamily(Database::getConnection(), $child1['id']);
+        $usernamesChild = array_column($familyChild, 'username');
+        $this->assertContains('parentuser', $usernamesChild);
+        $this->assertContains('child1', $usernamesChild);
+        $this->assertContains('child2', $usernamesChild);
+        $this->assertCount(3, $familyChild);
+    }
+    public function testGetDisplayNameReturnsCorrectName()
+    {
+        $pdo = Database::getConnection();
+
+        // Create a user
+        User::create('testuser', 'Password123', 'user');
+        $user = User::findByUsername('testuser');
+
+        // Should return username if no user_settings entry
+        $displayName = User::getDisplayName($pdo, $user['id']);
+        $this->assertEquals('testuser', $displayName);
+
+        // Add a user_settings entry
+        $stmt = $pdo->prepare("INSERT INTO user_settings (user_id, name) VALUES (?, ?)");
+        $stmt->execute([$user['id'], 'Test Display Name']);
+
+        // Should now return the name from user_settings
+        $displayName = User::getDisplayName($pdo, $user['id']);
+        $this->assertEquals('Test Display Name', $displayName);
+
+        // Should return 'Unknown' for non-existent user
+        $displayName = User::getDisplayName($pdo, 99999);
+        $this->assertEquals('Unknown', $displayName);
     }
 }

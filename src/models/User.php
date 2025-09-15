@@ -102,4 +102,55 @@ class User
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
+    public static function getAllFamily($pdo, $userId)
+    {
+        // Get current user's info and role
+        $user = self::findById($userId);
+        $roleInfo = self::getPermissions($userId);
+        $role = $roleInfo['role'];
+
+        $family = [];
+
+        if ($role === 'user') {
+            // This is the family owner, get all users where parent_id = $userId
+            $stmt = $pdo->prepare('SELECT * FROM users WHERE parent_id = ?');
+            $stmt->execute([$userId]);
+            $children = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Include the owner
+            $family[] = $user;
+            $family = array_merge($family, $children);
+        } else {
+            // This is a parent or child, get all users with the same parent_id
+            $parentId = $user['parent_id'];
+            if ($parentId) {
+                // Get parent user
+                $parent = self::findById($parentId);
+
+                // Get all users with this parent_id (siblings)
+                $stmt = $pdo->prepare('SELECT * FROM users WHERE parent_id = ?');
+                $stmt->execute([$parentId]);
+                $siblings = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+                // Include parent and siblings
+                $family[] = $parent;
+                $family = array_merge($family, $siblings);
+            }
+        }
+
+        return $family;
+    }
+    public static function getDisplayName($pdo, $userId)
+    {
+        // Try user_settings first, fallback to users table
+        $stmt = $pdo->prepare("SELECT name FROM user_settings WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $name = $stmt->fetchColumn();
+        if ($name) {
+            return $name;
+        }
+        $stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn() ?: 'Unknown';
+    }
 }
