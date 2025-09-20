@@ -13,38 +13,49 @@
 </head>
 
 <body>
-    <header>
-        <h1>Family Manager</h1>
-        <?php if (!empty($_SESSION['user_id'])): ?>
-            <nav>
-                <a href="dashboard.php">Dashboard</a>
-                <a href="logout.php">Logout</a>
-
-            </nav>
-        <?php endif; ?>
-        <hr>
+    <header class="bg-primary text-white mb-4">
+        <div class="container py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Family Manager</h1>
+                <?php if (!empty($_SESSION['user_id'])): ?>
+                    <nav>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a href="dashboard.php" class="nav-link text-white">Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="logout.php" class="nav-link text-white">Logout</a>
+                            </li>
+                        </ul>
+                    </nav>
+                <?php endif; ?>
+            </div>
+        </div>
     </header>
-    <main>
+    <main class="container mb-5">
         <?php if (!empty($message)): ?>
-            <div class="alert"><?= htmlspecialchars($message) ?></div>
+            <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
         <?= $content ?>
     </main>
-    <footer>
-        <hr>
-        <p>&copy; <?= date('Y') ?> Family Manager</p>
+    <footer class="bg-light text-center py-3 mt-auto border-top">
+        <p class="mb-0">&copy; <?= date('Y') ?> Family Manager</p>
     </footer>
     <?php
     $devMode = filter_var($_ENV['DEV_MODE'] ?? false, FILTER_VALIDATE_BOOLEAN);
     if ($devMode) {
-        echo '<div class="debug-info">';
-        echo '<h3>Debug Info</h3>';
-        echo '<pre>';
+        echo '<div class="container my-4">';
+        echo '<div class="card border-danger">';
+        echo '<div class="card-header bg-danger text-white">Debug Info</div>';
+        echo '<div class="card-body">';
+        echo '<pre class="mb-0">';
         echo '<strong>$_SESSION:</strong>' . "\n" . print_r($_SESSION, true) . "\n";
         echo "<strong>Permissions</strong>: \n" . print_r($permissions ?? [], true) . "\n";
         echo '<strong>Role</strong>: ' . print_r($role ?? 'N/A', true) . "\n";
         echo '<strong>$_POST</strong>:' . "\n" . print_r($_POST, true) . "\n";
         echo '</pre>';
+        echo '</div>';
+        echo '</div>';
         echo '</div>';
     }
     ?>

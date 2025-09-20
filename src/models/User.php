@@ -154,4 +154,10 @@ class User
         $stmt->execute([$userId]);
         return $stmt->fetchColumn();
     }
+    public static function getRole($pdo, $userId)
+    {
+        $stmt = $pdo->prepare("SELECT role FROM user_permissions WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn() ?: 'child';
+    }
 }

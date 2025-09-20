@@ -1,7 +1,7 @@
 <h2>Welcome to your dashboard!</h2>
 
 <?php if (!empty($_SESSION['message'])): ?>
-    <div class="alert"><?= $_SESSION['message'] ?></div>
+    <div class="alert alert-info"><?= htmlspecialchars($_SESSION['message']) ?></div>
     <?php unset($_SESSION['message']); ?>
 <?php endif; ?>
 

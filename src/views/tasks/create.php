@@ -39,19 +39,30 @@ if (isset($_SESSION['system_message'])) {
 
 ?>
 <h2>Create Task</h2>
-<form method="POST">
-
-    <label>Task Name: <input type="text" name="name" required></label><br>
-    <label>Description: <textarea name="description"></textarea></label><br>
-    <label>Reward: <input type="number" name="reward_units"></label><br>
-    <label>
-        <input type="checkbox" id="has_due_date" onclick="toggleDueDate()"> Has Due Date?
-    </label><br>
-    <div id="due_date_field" style="display:none;">
-        <label>Due Date: <input type="date" name="due_date"></label><br>
+<form method="POST" class="p-3 border rounded bg-light mb-4">
+    <div class="mb-3">
+        <label for="task_name" class="form-label">Task Name:</label>
+        <input type="text" id="task_name" name="name" class="form-control" required>
     </div>
-    <label>Assign To:
-        <select name="assigned_to">
+    <div class="mb-3">
+        <label for="description" class="form-label">Description:</label>
+        <textarea id="description" name="description" class="form-control"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="reward_units" class="form-label">Reward:</label>
+        <input type="number" id="reward_units" name="reward_units" class="form-control">
+    </div>
+    <div class="form-check mb-3">
+        <input type="checkbox" class="form-check-input" id="has_due_date" onclick="toggleDueDate()">
+        <label class="form-check-label" for="has_due_date">Has Due Date?</label>
+    </div>
+    <div id="due_date_field" style="display:none;" class="mb-3">
+        <label for="due_date" class="form-label">Due Date:</label>
+        <input type="date" id="due_date" name="due_date" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label for="assigned_to" class="form-label">Assign To:</label>
+        <select id="assigned_to" name="assigned_to" class="form-select">
             <option value="">-- Select Family Member --</option>
             <?php foreach ($users as $user): ?>
                 <option value="<?= htmlspecialchars($user['id']) ?>">
@@ -59,8 +70,8 @@ if (isset($_SESSION['system_message'])) {
                 </option>
             <?php endforeach; ?>
         </select>
-    </label><br>
-    <button type="submit">Create Task</button>
+    </div>
+    <button type="submit" class="btn btn-primary">Create Task</button>
 </form>
 <script>
     function toggleDueDate() {
