@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     description TEXT,
+    completed BOOLEAN DEFAULT FALSE,
     reward_units FLOAT DEFAULT 0,
     due_date DATE NULL,
     assigned_to INT,
