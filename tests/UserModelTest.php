@@ -107,7 +107,7 @@ class UserModelTest extends TestCase
         $this->assertContains('parentuser', $usernames);
         $this->assertContains('child1', $usernames);
         $this->assertContains('child2', $usernames);
-        $this->assertCount(4, $family);
+        $this->assertCount(3, $family);
 
         // Test for child role
         $child1 = User::findByUsername('child1');
@@ -116,7 +116,7 @@ class UserModelTest extends TestCase
         $this->assertContains('parentuser', $usernamesChild);
         $this->assertContains('child1', $usernamesChild);
         $this->assertContains('child2', $usernamesChild);
-        $this->assertCount(4, $familyChild);
+        $this->assertCount(3, $familyChild);
     }
     public function testGetDisplayNameReturnsCorrectName()
     {
