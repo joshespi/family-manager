@@ -12,6 +12,7 @@ $tasks = $taskController->getAllTasks($family_id);
 if (empty($tasks)): ?>
     <p>No tasks available.</p>
 <?php else: ?>
+    <h2>Family Tasks</h2>
     <ul>
         <?php foreach ($tasks as $task): ?>
             <li>

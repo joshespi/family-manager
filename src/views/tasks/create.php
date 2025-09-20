@@ -4,7 +4,7 @@ use App\Controllers\TaskController;
 use App\Models\User;
 
 // Fetch users (family members) from the database
-$users = \App\Models\User::getAllFamily($pdo, $_SESSION['user_id']);
+$users = User::getAllFamily($pdo, $_SESSION['user_id']);
 $parent_id = User::getParentId($pdo, $_SESSION['user_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task_id'])) {
@@ -38,7 +38,7 @@ if (isset($_SESSION['system_message'])) {
 }
 
 ?>
-
+<h2>Create Task</h2>
 <form method="POST">
 
     <label>Task Name: <input type="text" name="name" required></label><br>
