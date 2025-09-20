@@ -12,7 +12,8 @@ class AuthControllerTest extends TestCase
     {
         $_SESSION = [];
         $pdo = Database::getConnection();
-        $pdo->exec("DELETE FROM users");
+        $pdo->exec("DELETE FROM tasks"); // Delete tasks first
+        $pdo->exec("DELETE FROM users"); // Then delete users
     }
 
     public function testCheckWithoutLogin()
@@ -62,7 +63,21 @@ class AuthControllerTest extends TestCase
         $result = AuthController::register($maliciousUsername, $password, $role);
         $this->assertFalse($result['success']);
     }
+    public function testPasswordIsHashedOnRegistration()
+    {
+        $username = 'hashuser_' . uniqid();
+        $password = 'SecurePass123';
+        $role = 'user';
 
+        AuthController::register($username, $password, $role);
+        $user = User::findByUsername($username);
+
+        // Password in DB should not match plain password
+        $this->assertNotEquals($password, $user['password']);
+
+        // Password should verify with password_verify
+        $this->assertTrue(password_verify($password, $user['password']));
+    }
     public function testLoginLogout()
     {
         $username = 'testuser';

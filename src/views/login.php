@@ -1,3 +1,9 @@
+<h2 class="text-center mb-4">Login</h2>
+
+<?php if (!empty($_SESSION['flash'])): ?>
+    <div class="alert alert-success text-center"><?= htmlspecialchars($_SESSION['flash']) ?></div>
+    <?php unset($_SESSION['flash']); ?>
+<?php endif; ?>
 <form method="post" action="index.php" class="p-4 border rounded bg-light mx-auto" style="max-width: 400px;">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
     <div class="mb-3">

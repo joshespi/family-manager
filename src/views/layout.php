@@ -16,12 +16,14 @@
     <header class="bg-primary text-white mb-4">
         <div class="container py-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3 mb-0">Family Manager</h1>
+                <a href="dashboard.php" class="nav-link text-white">
+                    <h1 class="h3 mb-0">Family Manager</h1>
+                </a>
                 <?php if (!empty($_SESSION['user_id'])): ?>
                     <nav>
                         <ul class="nav">
                             <li class="nav-item">
-                                <a href="dashboard.php" class="nav-link text-white">Dashboard</a>
+                                <a href="profile.php" class="nav-link text-white">Profile</a>
                             </li>
                             <li class="nav-item">
                                 <a href="logout.php" class="nav-link text-white">Logout</a>

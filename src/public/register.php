@@ -12,29 +12,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // CSRF check
     $csrfToken = $_POST['csrf_token'] ?? '';
     if (!SessionManager::validateCsrfToken($csrfToken)) {
-        echo "Invalid CSRF token.";
-        exit;
-    }
-
-    // Input validation & sanitization
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $role = $_POST['role'] ?? 'user';
-
-    $validation = User::validateCredentials($username, $password);
-
-    $result = AuthController::register($username, $password, $role);
-    if ($result['success']) {
-        echo "Registration successful. <a href=\"/\">Login here</a>.";
+        $error = "Invalid CSRF token.";
     } else {
-        echo $result['message'] . ' <a href="/register.php">Try again</a>.';
+        // Input validation & sanitization
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $role = $_POST['role'] ?? 'user';
+
+        $validation = User::validateCredentials($username, $password);
+
+        if (!$validation['success']) {
+            $error = $validation['message'];
+        } else {
+            $result = AuthController::register($username, $password, $role);
+            if ($result['success']) {
+                $_SESSION['flash'] = "Registration successful! You can now log in.";
+                header("Location: /index.php");
+                exit;
+            } else {
+                $error = $result['message'];
+            }
+        }
     }
-    exit;
 }
+
 $csrfToken = SessionManager::generateCsrfToken();
 render('register', [
     'csrfToken' => $csrfToken,
     'error' => $error,
-    'flash' => $success,
     'title' => 'Register'
 ]);

@@ -1,4 +1,7 @@
 <h2 class="text-center mb-4">Register</h2>
+<?php if (!empty($error)): ?>
+    <div class="alert alert-danger"><?= htmlspecialchars($error) ?> <a href="/register.php" class="alert-link">Try again</a>.</div>
+<?php endif; ?>
 <form method="post" action="register.php" class="p-4 border rounded bg-light mx-auto" style="max-width: 400px;">
     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
     <div class="mb-3">
