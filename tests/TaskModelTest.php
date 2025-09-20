@@ -25,7 +25,7 @@ class TaskModelTest extends TestCase
     public function testCreateTask()
     {
         $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
-        $result = Task::create($this->pdo, 'Test Task', 'Test Description', 5.5, '2025-09-15', $userId);
+        $result = Task::create($this->pdo, 'Test Task', 'Test Description', 5.5, '2025-09-15', $userId, 1);
         $this->assertTrue($result);
 
         // Get the last inserted task ID
@@ -42,10 +42,10 @@ class TaskModelTest extends TestCase
     public function testGetAllReturnsTasks()
     {
         $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
-        Task::create($this->pdo, 'Task 1', 'Desc 1', 1, null, $userId);
-        Task::create($this->pdo, 'Task 2', 'Desc 2', 2, null, $userId);
+        Task::create($this->pdo, 'Task 1', 'Desc 1', 1, null, $userId, 1);
+        Task::create($this->pdo, 'Task 2', 'Desc 2', 2, null, $userId, 1);
 
-        $tasks = Task::getAll($this->pdo);
+        $tasks = Task::getAll($this->pdo, 1);
         $this->assertCount(2, $tasks);
         $this->assertEquals('Task 1', $tasks[0]['name']);
         $this->assertEquals('Task 2', $tasks[1]['name']);

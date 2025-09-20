@@ -13,9 +13,9 @@ class TaskController
         $this->pdo = $pdo;
     }
 
-    public function getAllTasks()
+    public function getAllTasks($family_id)
     {
-        return Task::getAll($this->pdo);
+        return Task::getAll($this->pdo, $family_id);
     }
 
     public function getTask($id)
@@ -33,7 +33,8 @@ class TaskController
             $data['description'],
             $reward_units,
             $due_date,
-            $data['assigned_to']
+            $data['assigned_to'],
+            $data['family_id']
         );
     }
     public function completeTask($id)

@@ -46,6 +46,13 @@ class User
         $result = $stmt->execute([$username, $hash, $parentId]);
         if ($result) {
             $userId = $pdo->lastInsertId();
+
+            // If this is the initial family user (parentId is null), set parent_id to their own id
+            if ($parentId === null) {
+                $stmtUpdate = $pdo->prepare('UPDATE users SET parent_id = ? WHERE id = ?');
+                $stmtUpdate->execute([$userId, $userId]);
+            }
+
             $stmt2 = $pdo->prepare('INSERT INTO user_permissions (user_id, role) VALUES (?, ?)');
             $result2 = $stmt2->execute([$userId, $role]);
             if ($result2) {
@@ -152,5 +159,11 @@ class User
         $stmt = $pdo->prepare("SELECT username FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchColumn() ?: 'Unknown';
+    }
+    public static function getParentId($pdo, $userId)
+    {
+        $stmt = $pdo->prepare("SELECT parent_id FROM users WHERE id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn();
     }
 }

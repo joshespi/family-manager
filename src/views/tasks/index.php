@@ -4,8 +4,9 @@ use App\Controllers\TaskController;
 use App\Models\User;
 
 $pdo = Database::getConnection();
+$family_id = User::getParentId($pdo, $_SESSION['user_id']);
 $taskController = new TaskController($pdo);
-$tasks = $taskController->getAllTasks();
+$tasks = $taskController->getAllTasks($family_id);
 
 
 if (empty($tasks)): ?>

@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     reward_units FLOAT DEFAULT 0,
     due_date DATE NULL,
     assigned_to INT,
+    family_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (assigned_to) REFERENCES users(id)

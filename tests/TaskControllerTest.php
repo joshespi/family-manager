@@ -34,7 +34,8 @@ class TaskControllerTest extends TestCase
             'description' => 'Created via controller',
             'reward_units' => 10.5,
             'due_date' => '2025-09-15',
-            'assigned_to' => $userId
+            'assigned_to' => $userId,
+            'family_id' => 1
         ];
         $result = $this->controller->createTask($data);
         $this->assertTrue($result);
@@ -56,17 +57,19 @@ class TaskControllerTest extends TestCase
             'description' => 'Desc 1',
             'reward_units' => 1,
             'due_date' => null,
-            'assigned_to' => $userId
+            'assigned_to' => $userId,
+            'family_id' => 1
         ]);
         $this->controller->createTask([
             'name' => 'Task 2',
             'description' => 'Desc 2',
             'reward_units' => 2,
             'due_date' => null,
-            'assigned_to' => $userId
+            'assigned_to' => $userId,
+            'family_id' => 1
         ]);
 
-        $tasks = $this->controller->getAllTasks();
+        $tasks = $this->controller->getAllTasks($family_id = 1);
         $this->assertCount(2, $tasks);
         $this->assertEquals('Task 1', $tasks[0]['name']);
         $this->assertEquals('Task 2', $tasks[1]['name']);

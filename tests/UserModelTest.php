@@ -107,7 +107,7 @@ class UserModelTest extends TestCase
         $this->assertContains('parentuser', $usernames);
         $this->assertContains('child1', $usernames);
         $this->assertContains('child2', $usernames);
-        $this->assertCount(3, $family);
+        $this->assertCount(4, $family);
 
         // Test for child role
         $child1 = User::findByUsername('child1');
@@ -116,14 +116,18 @@ class UserModelTest extends TestCase
         $this->assertContains('parentuser', $usernamesChild);
         $this->assertContains('child1', $usernamesChild);
         $this->assertContains('child2', $usernamesChild);
-        $this->assertCount(3, $familyChild);
+        $this->assertCount(4, $familyChild);
     }
     public function testGetDisplayNameReturnsCorrectName()
     {
         $pdo = Database::getConnection();
 
-        // Create a user
-        User::create('testuser', 'Password123', 'user');
+        // Create a parent user first
+        User::create('parentuser', 'Password123', 'parent');
+        $parent = User::findByUsername('parentuser');
+
+        // Create a user with parent_id set to the parent's id
+        User::create('testuser', 'Password123', 'user', $parent['id']);
         $user = User::findByUsername('testuser');
 
         // Should return username if no user_settings entry

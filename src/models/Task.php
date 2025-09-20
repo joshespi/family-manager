@@ -15,9 +15,10 @@ class Task
     public $created_at;
     public $updated_at;
 
-    public static function getAll($pdo)
+    public static function getAll($pdo, $family_id)
     {
-        $stmt = $pdo->query("SELECT * FROM tasks");
+        $stmt = $pdo->prepare("SELECT * FROM tasks WHERE completed=false AND family_id = ?");
+        $stmt->execute([$family_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -27,12 +28,12 @@ class Task
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    public static function create($pdo, $name, $description, $reward_units, $due_date, $assigned_to)
+    public static function create($pdo, $name, $description, $reward_units, $due_date, $assigned_to, $family_id)
     {
         $stmt = $pdo->prepare(
-            "INSERT INTO tasks (name, description, reward_units, due_date, assigned_to) VALUES (?, ?, ?, ?, ?)"
+            "INSERT INTO tasks (name, description, reward_units, due_date, assigned_to, family_id) VALUES (?, ?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to]);
+        return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $family_id]);
     }
     public static function markCompleted($pdo, $id)
     {
