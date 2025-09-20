@@ -31,5 +31,10 @@ $csrfToken = SessionManager::generateCsrfToken();
 render('login', [
     'title' => 'Login',
     'csrfToken' => $csrfToken,
-    'error' => $error
+    'error' => $error,
+    'flash' => $_SESSION['flash'] ?? ''
+
 ]);
+if (!empty($_SESSION['flash'])) {
+    unset($_SESSION['flash']);
+}

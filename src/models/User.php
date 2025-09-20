@@ -55,6 +55,11 @@ class User
 
             $stmt2 = $pdo->prepare('INSERT INTO user_permissions (user_id, role) VALUES (?, ?)');
             $result2 = $stmt2->execute([$userId, $role]);
+
+            // Insert default user_settings row
+            $stmtSettings = $pdo->prepare('INSERT INTO user_settings (user_id, name) VALUES (?, ?)');
+            $stmtSettings->execute([$userId, $username]);
+
             if ($result2) {
                 return ['success' => true, 'message' => 'User created successfully.'];
             }
@@ -153,5 +158,11 @@ class User
         $stmt = $pdo->prepare("SELECT parent_id FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchColumn();
+    }
+    public static function getRole($pdo, $userId)
+    {
+        $stmt = $pdo->prepare("SELECT role FROM user_permissions WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetchColumn() ?: 'child';
     }
 }
