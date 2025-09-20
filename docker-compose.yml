@@ -43,8 +43,6 @@ services:
       - "8045:80"
     environment:
       PMA_HOST: ${DB_HOST}
-      PMA_USER: ${DB_USER}
-      PMA_PASSWORD: ${DB_PASS}
     depends_on:
       - famman_db
 volumes:
