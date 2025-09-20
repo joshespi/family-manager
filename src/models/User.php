@@ -111,41 +111,29 @@ class User
     }
     public static function getAllFamily($pdo, $userId)
     {
-        // Get current user's info and role
+        // Get current user's info
         $user = self::findById($userId);
-        $roleInfo = self::getPermissions($userId);
-        $role = $roleInfo['role'];
+        if (!$user) return [];
 
-        $family = [];
+        $parentId = $user['parent_id'];
 
-        if ($role === 'user') {
-            // This is the family owner, get all users where parent_id = $userId
-            $stmt = $pdo->prepare('SELECT * FROM users WHERE parent_id = ?');
-            $stmt->execute([$userId]);
-            $children = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        // Get all users with the same parent_id
+        $stmt = $pdo->prepare('SELECT * FROM users WHERE parent_id = ?');
+        $stmt->execute([$parentId]);
+        $family = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
-            // Include the owner
-            $family[] = $user;
-            $family = array_merge($family, $children);
-        } else {
-            // This is a parent or child, get all users with the same parent_id
-            $parentId = $user['parent_id'];
-            if ($parentId) {
-                // Get parent user
-                $parent = self::findById($parentId);
-
-                // Get all users with this parent_id (siblings)
-                $stmt = $pdo->prepare('SELECT * FROM users WHERE parent_id = ?');
-                $stmt->execute([$parentId]);
-                $siblings = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-                // Include parent and siblings
-                $family[] = $parent;
-                $family = array_merge($family, $siblings);
-            }
+        // Also include the parent user
+        $parent = self::findById($parentId);
+        if ($parent) {
+            array_unshift($family, $parent);
         }
 
-        return $family;
+        // Remove duplicates by user id
+        $unique = [];
+        foreach ($family as $member) {
+            $unique[$member['id']] = $member;
+        }
+        return array_values($unique);
     }
     public static function getDisplayName($pdo, $userId)
     {
