@@ -36,4 +36,8 @@ class TaskController
             $data['assigned_to']
         );
     }
+    public function completeTask($id)
+    {
+        return Task::markCompleted($this->pdo, $id);
+    }
 }

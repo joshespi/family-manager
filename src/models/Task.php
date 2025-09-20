@@ -34,4 +34,9 @@ class Task
         );
         return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to]);
     }
+    public static function markCompleted($pdo, $id)
+    {
+        $stmt = $pdo->prepare("UPDATE tasks SET completed = true WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
 }

@@ -4,6 +4,13 @@ use App\Controllers\TaskController;
 // Fetch users (family members) from the database
 $users = \App\Models\User::getAllFamily($pdo, $_SESSION['user_id']);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task_id'])) {
+    $taskController = new TaskController($pdo);
+    $success = $taskController->completeTask((int)$_POST['complete_task_id']);
+    $_SESSION['system_message'] = $success ? "Task marked as completed!" : "Error completing task.";
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $controller = new TaskController($pdo);
