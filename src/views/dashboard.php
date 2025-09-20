@@ -1,4 +1,4 @@
-<h2>Welcome to your dashboard!</h2>
+<h2>Dashboard for User: <?= $user ?></h2>
 
 <?php if (!empty($_SESSION['message'])): ?>
     <div class="alert alert-info"><?= htmlspecialchars($_SESSION['message']) ?></div>
@@ -7,14 +7,6 @@
 
 
 <?php
-
-if (isset($permissions) && in_array('parent_user', $permissions)) {
-    include __DIR__ . '/roles/parent.php';
-}
-
-if (isset($permissions) && in_array('child_user', $permissions)) {
-    include __DIR__ . '/roles/child.php';
-}
 echo '<hr>';
 include __DIR__ . '/tasks/index.php';
 ?>
