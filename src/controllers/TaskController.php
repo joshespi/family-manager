@@ -41,4 +41,16 @@ class TaskController
     {
         return Task::markCompleted($this->pdo, $id);
     }
+    public function updateTask($data)
+    {
+        return Task::update(
+            $this->pdo,
+            $data['task_id'],
+            $data['name'],
+            $data['description'],
+            $data['reward_units'],
+            $data['due_date'],
+            $data['assigned_to']
+        );
+    }
 }

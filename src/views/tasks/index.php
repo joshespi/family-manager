@@ -8,6 +8,20 @@ $family_id = User::getParentId($pdo, $_SESSION['user_id']);
 $taskController = new TaskController($pdo);
 $tasks = $taskController->getAllTasks($family_id);
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit') {
+    $taskController = new TaskController($pdo);
+    $taskController->updateTask([
+        'task_id' => (int)$_POST['task_id'],
+        'name' => trim($_POST['name']),
+        'description' => trim($_POST['description']),
+        'reward_units' => isset($_POST['reward_units']) ? (int)$_POST['reward_units'] : null,
+        'due_date' => trim($_POST['due_date']),
+        'assigned_to' => (int)$_POST['assigned_to'],
+    ]);
+    $_SESSION['system_message'] = "Task updated!";
+    header("Location: " . $_SERVER['REQUEST_URI']);
+    exit;
+}
 
 if (isset($permissions) && in_array('parent_user', $permissions)) {
     include __DIR__ . '/create.php';
@@ -39,6 +53,19 @@ if (empty($tasks)): ?>
                                 <form method="POST" class="me-2">
                                     <input type="hidden" name="complete_task_id" value="<?= $task['id'] ?>">
                                     <button type="submit" class="btn btn-success btn-sm">Complete</button>
+                                    <!-- Edit Button (shows modal) -->
+                                    <?php if (isset($permissions) && in_array('parent_user', $permissions)):
+                                        include __DIR__ . '/edit.php';
+                                    ?>
+
+                                        <button type="button"
+                                            class="btn btn-primary btn-sm ms-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editTaskModal<?= $task['id'] ?>">
+                                            Edit
+                                        </button>
+                                    <?php endif; ?>
+
                                 </form>
                             <?php else: ?>
                                 <span class="badge bg-success">Completed</span>
