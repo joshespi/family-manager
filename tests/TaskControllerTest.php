@@ -74,4 +74,38 @@ class TaskControllerTest extends TestCase
         $this->assertEquals('Task 1', $tasks[0]['name']);
         $this->assertEquals('Task 2', $tasks[1]['name']);
     }
+    public function testUpdateTask()
+    {
+        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
+        // Create a task to update
+        $this->controller->createTask([
+            'name' => 'Original Task',
+            'description' => 'Original description',
+            'reward_units' => 5,
+            'due_date' => '2025-09-20',
+            'assigned_to' => $userId,
+            'family_id' => 1
+        ]);
+        $taskId = $this->pdo->lastInsertId();
+
+        // Update the task
+        $updateData = [
+            'task_id' => $taskId,
+            'name' => 'Updated Task',
+            'description' => 'Updated description',
+            'reward_units' => 15,
+            'due_date' => '', // Test clearing due date
+            'assigned_to' => $userId
+        ];
+        $result = $this->controller->updateTask($updateData);
+        $this->assertTrue($result);
+
+        // Fetch and assert
+        $updatedTask = $this->controller->getTask($taskId);
+        $this->assertEquals('Updated Task', $updatedTask['name']);
+        $this->assertEquals('Updated description', $updatedTask['description']);
+        $this->assertEquals(15, $updatedTask['reward_units']);
+        $this->assertNull($updatedTask['due_date']); // Should be null after clearing
+        $this->assertEquals($userId, $updatedTask['assigned_to']);
+    }
 }
