@@ -40,4 +40,13 @@ class Task
         $stmt = $pdo->prepare("UPDATE tasks SET completed = true WHERE id = ?");
         return $stmt->execute([$id]);
     }
+    public static function update($pdo, $id, $name, $description, $reward_units, $due_date, $assigned_to)
+    {
+        // Convert empty due_date to null
+        $due_date = empty($_POST['due_date']) ? null : $_POST['due_date'];
+        $stmt = $pdo->prepare(
+            "UPDATE tasks SET name = ?, description = ?, reward_units = ?, due_date = ?, assigned_to = ? WHERE id = ?"
+        );
+        return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $id]);
+    }
 }
