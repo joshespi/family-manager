@@ -43,6 +43,7 @@ class TaskController
     }
     public function updateTask($data)
     {
+        $assigned_to = !empty($data['assigned_to']) ? (int)$data['assigned_to'] : null;
         return Task::update(
             $this->pdo,
             $data['task_id'],
@@ -50,7 +51,7 @@ class TaskController
             $data['description'],
             $data['reward_units'],
             $data['due_date'],
-            $data['assigned_to']
+            $assigned_to
         );
     }
 }
