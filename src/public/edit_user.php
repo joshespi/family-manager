@@ -11,9 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($id && $username && $role) {
         User::updateUser($id, $username, $role);
-        $_SESSION['message'] = "User updated successfully.";
+        $_SESSION['system_message'] = "User updated successfully.";
     } else {
-        $_SESSION['message'] = "Invalid input.";
+        $_SESSION['system_message'] = "Invalid input.";
     }
     header('Location: /admin.php');
     exit;

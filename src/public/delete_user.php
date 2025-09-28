@@ -14,9 +14,9 @@ $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
 if ($id > 0) {
     if (User::deleteUser($id)) {
-        $_SESSION['message'] = "User deleted successfully.";
+        $_SESSION['system_message'] = "User deleted successfully.";
     } else {
-        $_SESSION['message'] = "Failed to delete user.";
+        $_SESSION['system_message'] = "Failed to delete user.";
     }
 }
 
