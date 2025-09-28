@@ -15,9 +15,7 @@ if (!empty($role) && $role !== 'admin') {
 <table class="table">
     <thead>
         <tr>
-
             <th>Username</th>
-
             <th>Role</th>
             <th>Actions</th>
         </tr>
@@ -25,9 +23,7 @@ if (!empty($role) && $role !== 'admin') {
     <tbody>
         <?php foreach ($allUsers as $user): ?>
             <tr>
-
                 <td><?= htmlspecialchars($user['username']) ?></td>
-
                 <td><?= htmlspecialchars($user['role']) ?></td>
                 <td>
                     <a href="edit_user.php?id=<?= urlencode($user['id']) ?>" class="btn btn-sm btn-primary">Edit</a>
