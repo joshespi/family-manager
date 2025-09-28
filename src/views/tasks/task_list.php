@@ -3,45 +3,45 @@
 use App\Models\User;
 ?>
 
-<?php foreach ($tasks as $task): ?>
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title mb-2"><?= htmlspecialchars($task['name'] ?? '') ?></h5>
-                <p class="card-text mb-1"><?= htmlspecialchars($task['description'] ?? '') ?></p>
-                <ul class="list-unstyled mb-2">
-                    <?php if (!empty($task['reward_units'])): ?>
-                        <li><strong>Reward:</strong> <?= htmlspecialchars($task['reward_units']) ?></li>
-                    <?php endif; ?>
-                    <?php if (!empty($task['due_date'])): ?>
-                        <li><strong>Due Date:</strong> <?= htmlspecialchars($task['due_date']) ?></li>
-                    <?php endif; ?>
-                    <li><strong>Assigned To:</strong> <?= htmlspecialchars(User::getDisplayName($pdo, $task['assigned_to'])) ?></li>
-                </ul>
-                <div class="d-flex align-items-center">
-                    <?php if (empty($task['completed'])): ?>
-                        <form method="POST" class="me-2">
-                            <input type="hidden" name="action" value="complete">
-                            <input type="hidden" name="task_id" value="<?= htmlspecialchars($task['id']) ?>">
-                            <button type="submit" class="btn btn-success btn-sm">Complete</button>
-                        </form>
-                        <!-- Edit Button (shows modal) -->
-                        <?php if ($isParent):
-                            include __DIR__ . '/edit.php';
-                        ?>
-                            <button type="button"
-                                class="btn btn-primary btn-sm ms-2"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editTaskModal<?= $task['id'] ?>">
-                                Edit
-                            </button>
+<div class="row g-3">
+    <?php foreach ($tasks as $task): ?>
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title mb-2"><?= htmlspecialchars($task['name'] ?? '') ?></h5>
+                    <p class="card-text mb-1"><?= htmlspecialchars($task['description'] ?? '') ?></p>
+                    <ul class="list-unstyled mb-2">
+                        <?php if (!empty($task['reward_units'])): ?>
+                            <li><strong>Reward:</strong> <?= htmlspecialchars($task['reward_units']) ?></li>
                         <?php endif; ?>
-                        </form>
-                    <?php else: ?>
-                        <span class="badge bg-success">Completed</span>
-                    <?php endif; ?>
+                        <?php if (!empty($task['due_date'])): ?>
+                            <li><strong>Due Date:</strong> <?= htmlspecialchars($task['due_date']) ?></li>
+                        <?php endif; ?>
+                        <li><strong>Assigned To:</strong> <?= htmlspecialchars(User::getDisplayName($pdo, $task['assigned_to'])) ?></li>
+                    </ul>
+                    <div class="mt-auto d-flex align-items-center">
+                        <?php if (empty($task['completed'])): ?>
+                            <form method="POST" class="me-2">
+                                <input type="hidden" name="complete_task_id" value="<?= $task['id'] ?>">
+                                <button type="submit" class="btn btn-success btn-sm">Complete</button>
+                                <!-- Edit Button (shows modal) -->
+                                <?php if ($isParent):
+                                    include __DIR__ . '/edit.php';
+                                ?>
+                                    <button type="button"
+                                        class="btn btn-primary btn-sm ms-2"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editTaskModal<?= $task['id'] ?>">
+                                        Edit
+                                    </button>
+                                <?php endif; ?>
+                            </form>
+                        <?php else: ?>
+                            <span class="badge bg-success">Completed</span>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-<?php endforeach; ?>
+    <?php endforeach; ?>
+</div>
