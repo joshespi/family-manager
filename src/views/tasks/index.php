@@ -8,17 +8,25 @@ $family_id = User::getParentId($pdo, $_SESSION['user_id']);
 $taskController = new TaskController($pdo);
 
 // Handle task POST requests
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $taskController = new TaskController($pdo);
-    $taskController->updateTask([
-        'task_id' => (int)$_POST['task_id'],
-        'name' => trim($_POST['name']),
-        'description' => trim($_POST['description']),
-        'reward_units' => isset($_POST['reward_units']) ? (int)$_POST['reward_units'] : null,
-        'due_date' => trim($_POST['due_date']),
-        'assigned_to' => (int)$_POST['assigned_to'],
-    ]);
-    $_SESSION['system_message'] = "Task updated!";
+
+    if ($_POST['action'] === 'edit') {
+        $taskController->updateTask([
+            'task_id' => (int)$_POST['task_id'],
+            'name' => trim($_POST['name']),
+            'description' => trim($_POST['description']),
+            'reward_units' => isset($_POST['reward_units']) ? (int)$_POST['reward_units'] : null,
+            'due_date' => trim($_POST['due_date']),
+            'assigned_to' => (int)$_POST['assigned_to'],
+        ]);
+        $_SESSION['system_message'] = "Task updated!";
+        error_log("Task updated: " . print_r($_POST, true));
+    } elseif ($_POST['action'] === 'complete') {
+        $taskController->completeTask((int)$_POST['task_id']);
+        $_SESSION['system_message'] = "Task marked as complete!";
+    }
+
     header("Location: " . $_SERVER['REQUEST_URI']);
     exit;
 }
@@ -31,11 +39,11 @@ $isChild = isset($permissions) && in_array('child_user', $permissions);
 // Permissions-based task retrieval
 if ($isChild) {
     // Children: only their assigned tasks
-    $tasks = $taskController->getTasksAssignedToUser($family_id, $_SESSION['user_id']);
+    $tasks = $taskController->getOpenTasksAssignedToUser($family_id, $_SESSION['user_id']);
 } elseif ($isParent) {
     // Parents: all family tasks and their own assigned tasks
     $allFamilyTasks = $taskController->getAllTasks($family_id);
-    $myTasks = $taskController->getTasksAssignedToUser($family_id, $_SESSION['user_id']);
+    $myTasks = $taskController->getOpenTasksAssignedToUser($family_id, $_SESSION['user_id']);
     $tasks = $allFamilyTasks; // Default display is all family tasks
 } else {
     // Fallback: show nothing

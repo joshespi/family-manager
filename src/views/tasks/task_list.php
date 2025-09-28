@@ -21,19 +21,21 @@ use App\Models\User;
                 <div class="d-flex align-items-center">
                     <?php if (empty($task['completed'])): ?>
                         <form method="POST" class="me-2">
-                            <input type="hidden" name="complete_task_id" value="<?= $task['id'] ?>">
+                            <input type="hidden" name="action" value="complete">
+                            <input type="hidden" name="task_id" value="<?= htmlspecialchars($task['id']) ?>">
                             <button type="submit" class="btn btn-success btn-sm">Complete</button>
-                            <!-- Edit Button (shows modal) -->
-                            <?php if ($isParent):
-                                include __DIR__ . '/edit.php';
-                            ?>
-                                <button type="button"
-                                    class="btn btn-primary btn-sm ms-2"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editTaskModal<?= $task['id'] ?>">
-                                    Edit
-                                </button>
-                            <?php endif; ?>
+                        </form>
+                        <!-- Edit Button (shows modal) -->
+                        <?php if ($isParent):
+                            include __DIR__ . '/edit.php';
+                        ?>
+                            <button type="button"
+                                class="btn btn-primary btn-sm ms-2"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editTaskModal<?= $task['id'] ?>">
+                                Edit
+                            </button>
+                        <?php endif; ?>
                         </form>
                     <?php else: ?>
                         <span class="badge bg-success">Completed</span>
