@@ -15,29 +15,35 @@
 
 <body>
     <header class="bg-primary text-white mb-4">
-        <div class="container py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <a href="dashboard.php" class="nav-link text-white">
-                    <h1 class="h3 mb-0">Family Manager</h1>
-                </a>
-                <?php if (!empty($_SESSION['user_id'])): ?>
-                    <nav>
-                        <ul class="nav">
-                            <?php if (!empty($role) && $role === 'admin'): ?>
+
+        <?php if (!empty($_SESSION['user_id'])): ?>
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+                <div class="container-fluid">
+                    <a class="navbar-brand text-white" href="dashboard.php">Family Manager</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <?php if (!empty($_SESSION['user_id'])): ?>
+                        <div class="collapse navbar-collapse" id="mainNavbar">
+                            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                                <?php if (!empty($role) && $role === 'admin'): ?>
+                                    <li class="nav-item">
+                                        <a href="admin.php" class="nav-link text-white">Admin</a>
+                                    </li>
+                                <?php endif; ?>
                                 <li class="nav-item">
-                                    <a href="admin.php" class="nav-link text-white">Admin</a>
+                                    <a href="profile.php" class="nav-link text-white">Profile</a>
                                 </li>
-                            <?php endif; ?>
-                            <li class="nav-item">
-                                <a href="profile.php" class="nav-link text-white">Profile</a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="logout.php" class="nav-link text-white">Logout</a>
-                            </li>
-                        </ul>
-                    </nav>
-                <?php endif; ?>
-            </div>
+                                <li class="nav-item">
+                                    <a href="logout.php" class="nav-link text-white">Logout</a>
+                                </li>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </nav>
+        <?php endif; ?>
+        </div>
         </div>
     </header>
     <main class="container mb-5">
