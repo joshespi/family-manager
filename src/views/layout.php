@@ -47,7 +47,11 @@
         <?= $content ?>
     </main>
     <footer class="bg-light text-center py-3 mt-auto border-top">
-        <p class="mb-0">&copy; <?= date('Y') ?> Family Manager</p>
+        <div class="d-flex justify-content-center flex-wrap gap-2">
+            <p class="mb-0">Version <?= htmlspecialchars($app_Version) ?></p>
+            <p class="mb-0"> | &copy; <?= date('Y') ?> Family Manager</p>
+            <p class="mb-0"> | <a href="https://github.com/joshespi/family-manager/issues">Issue Tracker/Feature Request</a></p>
+        </div>
     </footer>
     <?php
     include __DIR__ . '/debug.php';
