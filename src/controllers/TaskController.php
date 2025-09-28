@@ -54,4 +54,10 @@ class TaskController
             $assigned_to
         );
     }
+    public function getTasksAssignedToUser($family_id, $user_id)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM tasks WHERE family_id = ? AND assigned_to = ?");
+        $stmt->execute([$family_id, $user_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

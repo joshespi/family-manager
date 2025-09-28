@@ -8,6 +8,7 @@ $family_id = User::getParentId($pdo, $_SESSION['user_id']);
 $taskController = new TaskController($pdo);
 $tasks = $taskController->getAllTasks($family_id);
 
+// Handle task POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit') {
     $taskController = new TaskController($pdo);
     $taskController->updateTask([
@@ -23,6 +24,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Permissions-based task retrieval
+if (isset($permissions) && in_array('child_user', $permissions)) {
+    // Only get tasks assigned to this child
+    $tasks = $taskController->getTasksAssignedToUser($family_id, $_SESSION['user_id']);
+} else {
+    // For parents, show all family tasks
+    $tasks = $taskController->getAllTasks($family_id);
+}
 if (isset($permissions) && in_array('parent_user', $permissions)) {
     include __DIR__ . '/create.php';
 }
