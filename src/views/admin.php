@@ -36,3 +36,7 @@ if (!empty($role) && $role !== 'admin') {
 
 <!-- Edit User Modals -->
 <?php require_once __DIR__ . '/admin/edit_user.php'; ?>
+
+
+<!-- Edit Changelog display -->
+<?php require_once __DIR__ . '/admin/changelog.php'; ?>
