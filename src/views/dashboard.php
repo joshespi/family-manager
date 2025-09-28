@@ -1,4 +1,4 @@
-<h2>Dashboard for User: <?= $user ?></h2>
+<h2>User: <?= $user ?></h2>
 
 <?php if (!empty($_SESSION['message'])): ?>
     <div class="alert alert-info"><?= htmlspecialchars($_SESSION['message']) ?></div>

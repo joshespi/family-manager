@@ -9,7 +9,6 @@ if (!empty($role) && $role !== 'admin') {
     <div class="alert alert-info"><?= htmlspecialchars($_SESSION['message']) ?></div>
     <?php unset($_SESSION['message']); ?>
 <?php endif; ?>
-<h1>Admin Panel</h1>
 
 <h2>User Management</h2>
 <table class="table">

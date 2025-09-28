@@ -6,7 +6,6 @@ use App\Models\User;
 $pdo = Database::getConnection();
 $family_id = User::getParentId($pdo, $_SESSION['user_id']);
 $taskController = new TaskController($pdo);
-$tasks = $taskController->getAllTasks($family_id);
 
 // Handle task POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit') {
@@ -24,70 +23,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// Task retrieval logic
+$isParent = isset($permissions) && in_array('parent_user', $permissions);
+$isChild = isset($permissions) && in_array('child_user', $permissions);
+
+
 // Permissions-based task retrieval
-if (isset($permissions) && in_array('child_user', $permissions)) {
-    // Only get tasks assigned to this child
+if ($isChild) {
+    // Children: only their assigned tasks
     $tasks = $taskController->getTasksAssignedToUser($family_id, $_SESSION['user_id']);
+} elseif ($isParent) {
+    // Parents: all family tasks and their own assigned tasks
+    $allFamilyTasks = $taskController->getAllTasks($family_id);
+    $myTasks = $taskController->getTasksAssignedToUser($family_id, $_SESSION['user_id']);
+    $tasks = $allFamilyTasks; // Default display is all family tasks
 } else {
-    // For parents, show all family tasks
-    $tasks = $taskController->getAllTasks($family_id);
+    // Fallback: show nothing
+    $tasks = [];
 }
-if (isset($permissions) && in_array('parent_user', $permissions)) {
+
+// Show create form for parents
+if ($isParent) {
     include __DIR__ . '/create.php';
 }
 
-if (empty($tasks)): ?>
-    <div class="alert alert-info">No tasks available.</div>
+// Display logic
+?>
+<h2 class="mb-4">My Tasks</h2>
+<?php if (empty($myTasks)): ?>
+    <div class="alert alert-info">No tasks assigned to you.</div>
 <?php else: ?>
-    <?php if (isset($permissions) && in_array('child_user', $permissions)): ?>
-        <h2 class="mb-4">My Tasks</h2>
-    <?php else: ?>
-        <h2 class="mb-4">Family Tasks</h2>
-    <?php endif; ?>
-    <div class="row g-3">
-
-        <?php foreach ($tasks as $task): ?>
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title mb-2"><?= htmlspecialchars($task['name'] ?? '') ?></h5>
-                        <p class="card-text mb-1"><?= htmlspecialchars($task['description'] ?? '') ?></p>
-                        <ul class="list-unstyled mb-2">
-                            <?php if (!empty($task['reward_units'])): ?>
-                                <li><strong>Reward:</strong> <?= htmlspecialchars($task['reward_units']) ?></li>
-                            <?php endif; ?>
-                            <?php if (!empty($task['due_date'])): ?>
-                                <li><strong>Due Date:</strong> <?= htmlspecialchars($task['due_date']) ?></li>
-                            <?php endif; ?>
-                            <li><strong>Assigned To:</strong> <?= htmlspecialchars(User::getDisplayName($pdo, $task['assigned_to'])) ?></li>
-                        </ul>
-                        <div class="d-flex align-items-center">
-                            <?php if (empty($task['completed'])): ?>
-                                <form method="POST" class="me-2">
-                                    <input type="hidden" name="complete_task_id" value="<?= $task['id'] ?>">
-                                    <button type="submit" class="btn btn-success btn-sm">Complete</button>
-                                    <!-- Edit Button (shows modal) -->
-                                    <?php if (isset($permissions) && in_array('parent_user', $permissions)):
-                                        include __DIR__ . '/edit.php';
-                                    ?>
-
-                                        <button type="button"
-                                            class="btn btn-primary btn-sm ms-2"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editTaskModal<?= $task['id'] ?>">
-                                            Edit
-                                        </button>
-                                    <?php endif; ?>
-
-                                </form>
-                            <?php else: ?>
-                                <span class="badge bg-success">Completed</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        <?php endforeach; ?>
-    </div>
+    <?php $tasks = $myTasks;
+    include __DIR__ . '/task_list.php'; ?>
 <?php endif; ?>
-</ul>
+
+<?php if ($isParent): ?>
+    <h2 class="mt-5 mb-4">Family Tasks</h2>
+    <?php if (empty($allFamilyTasks)): ?>
+        <div class="alert alert-info">No family tasks available.</div>
+    <?php else: ?>
+        <?php $tasks = $allFamilyTasks;
+        include __DIR__ . '/task_list.php'; ?>
+    <?php endif; ?>
+<?php endif; ?>

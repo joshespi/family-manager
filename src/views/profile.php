@@ -6,7 +6,7 @@
 <div class="container my-4">
     <div class="card mb-4">
         <div class="card-body">
-            <h2 class="card-title mb-3">Profile</h2>
+            <h2 class="card-title mb-3">User Information</h2>
             <p><strong>Username:</strong> <?= htmlspecialchars($user['username']) ?></p>
             <p><strong>Role:</strong> <?= htmlspecialchars($role) ?></p>
         </div>

@@ -44,6 +44,7 @@
         <?php if (!empty($message)): ?>
             <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
+        <h1><?= $title ?></h1>
         <?= $content ?>
     </main>
     <footer class="bg-light text-center py-3 mt-auto border-top">
