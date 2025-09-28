@@ -108,4 +108,58 @@ class TaskControllerTest extends TestCase
         $this->assertNull($updatedTask['due_date']); // Should be null after clearing
         $this->assertEquals($userId, $updatedTask['assigned_to']);
     }
+    public function testGetTasksAssignedToUser()
+    {
+        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
+
+        // Insert another user
+        $this->pdo->exec("INSERT INTO users (username, password) VALUES ('otheruser', 'pass')");
+        $otherUserId = $this->pdo->query("SELECT id FROM users WHERE username = 'otheruser'")->fetchColumn();
+
+        // Insert tasks for testuser in family 1
+        $this->controller->createTask([
+            'name' => 'User Task 1',
+            'description' => 'Desc 1',
+            'reward_units' => 3,
+            'due_date' => '2025-10-01',
+            'assigned_to' => $userId,
+            'family_id' => 1
+        ]);
+        $this->controller->createTask([
+            'name' => 'User Task 2',
+            'description' => 'Desc 2',
+            'reward_units' => 4,
+            'due_date' => null,
+            'assigned_to' => $userId,
+            'family_id' => 1
+        ]);
+        // Insert a task for testuser in another family
+        $this->controller->createTask([
+            'name' => 'Other Family Task',
+            'description' => 'Desc 3',
+            'reward_units' => 5,
+            'due_date' => null,
+            'assigned_to' => $userId,
+            'family_id' => 2
+        ]);
+        // Insert a task for another user in family 1
+        $this->controller->createTask([
+            'name' => 'Other User Task',
+            'description' => 'Desc 4',
+            'reward_units' => 6,
+            'due_date' => null,
+            'assigned_to' => $otherUserId,
+            'family_id' => 1
+        ]);
+
+        $tasks = $this->controller->getTasksAssignedToUser(1, $userId);
+        $this->assertCount(2, $tasks);
+        $taskNames = array_column($tasks, 'name');
+        $this->assertContains('User Task 1', $taskNames);
+        $this->assertContains('User Task 2', $taskNames);
+        foreach ($tasks as $task) {
+            $this->assertEquals($userId, $task['assigned_to']);
+            $this->assertEquals(1, $task['family_id']);
+        }
+    }
 }
