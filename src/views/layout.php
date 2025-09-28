@@ -50,22 +50,7 @@
         <p class="mb-0">&copy; <?= date('Y') ?> Family Manager</p>
     </footer>
     <?php
-    $devMode = filter_var($_ENV['DEV_MODE'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    if ($devMode) {
-        echo '<div class="container my-4">';
-        echo '<div class="card border-danger">';
-        echo '<div class="card-header bg-danger text-white">Debug Info</div>';
-        echo '<div class="card-body">';
-        echo '<pre class="mb-0">';
-        echo '<strong>$_SESSION:</strong>' . "\n" . print_r($_SESSION, true) . "\n";
-        echo "<strong>Permissions</strong>: \n" . print_r($permissions ?? [], true) . "\n";
-        echo '<strong>Role</strong>: ' . print_r($role ?? 'N/A', true) . "\n";
-        echo '<strong>$_POST</strong>:' . "\n" . print_r($_POST, true) . "\n";
-        echo '</pre>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-    }
+    include __DIR__ . '/debug.php';
     ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
