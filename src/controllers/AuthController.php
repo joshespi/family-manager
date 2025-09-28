@@ -3,11 +3,13 @@
 namespace App\Controllers;
 
 use App\Models\User;
+use App\Controllers\LoggerController;
 
 class AuthController
 {
     public static function login($username, $password)
     {
+
         $user = User::findByUsername($username);
         if ($user && password_verify($password, $user['password'])) {
             SessionManager::regenerate();
@@ -49,6 +51,9 @@ class AuthController
         $created = User::create($username, $password, $role);
 
         if ($created) {
+            // Log the registration
+            global $pdo;
+            LoggerController::log($pdo, null, 'REGISTER', "New user registered: $username ($role)");
             return ['success' => true, 'message' => 'Registration successful.'];
         }
 
@@ -64,6 +69,24 @@ class AuthController
         if (!in_array($role, ['parent', 'child'])) {
             return ['success' => false, 'message' => 'Invalid role for sub-account.'];
         }
-        return User::create($username, $password, $role, $creatorId);
+        try {
+            $result = User::create($username, $password, $role, $creatorId);
+        } catch (\Exception $e) {
+            error_log($e->getMessage());
+            return ['success' => false, 'message' => 'Exception: ' . $e->getMessage()];
+        }
+
+        // Log the sub-account creation
+        global $pdo;
+        if ($result) {
+            LoggerController::log(
+                $pdo,
+                $creatorId,
+                'CREATE_SUBACCOUNT',
+                "Parent user ID $creatorId created sub-account: $username ($role)"
+            );
+        }
+
+        return $result;
     }
 }

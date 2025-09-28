@@ -6,16 +6,24 @@ use PHPUnit\Framework\TestCase;
 use App\Controllers\AuthController;
 use App\Models\User;
 
+
 class AuthControllerTest extends TestCase
 {
+    protected $pdo;
+
     protected function setUp(): void
     {
+        global $pdo;
         $_SESSION = [];
         $pdo = Database::getConnection();
-        $pdo->exec("DELETE FROM tasks"); // Delete tasks first
-        $pdo->exec("DELETE FROM users"); // Then delete users
+        $this->pdo = $pdo;
+        // Clear tables to avoid FK constraint issues
+        $this->pdo->exec("DELETE FROM tasks");
+        $this->pdo->exec("DELETE FROM users");
+        $this->pdo->exec("DELETE FROM user_permissions");
+        $this->pdo->exec("DELETE FROM user_settings");
+        $this->pdo->exec("DELETE FROM change_log");
     }
-
     public function testCheckWithoutLogin()
     {
         $this->assertFalse(AuthController::check());
