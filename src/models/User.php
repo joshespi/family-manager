@@ -88,6 +88,9 @@ class User
         if ($role === 'child') {
             $permissions[] = 'child_user';    // Limited access
         }
+        if ($role === 'admin') {
+            $permissions[] = 'admin_user';    // Admin access
+        }
 
         return [
             'role' => $role,
@@ -164,5 +167,22 @@ class User
         $stmt = $pdo->prepare("SELECT role FROM user_permissions WHERE user_id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchColumn() ?: 'child';
+    }
+    public static function fetchAllWithPermissionsAndSettings($pdo)
+    {
+        $stmt = $pdo->prepare(
+            "SELECT 
+                u.id, 
+                u.username, 
+                u.parent_id, 
+                up.role, 
+                us.name AS display_name
+            FROM users u
+            LEFT JOIN user_permissions up ON u.id = up.user_id
+            LEFT JOIN user_settings us ON u.id = us.user_id
+            ORDER BY u.id ASC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
