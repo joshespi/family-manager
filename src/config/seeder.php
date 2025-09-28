@@ -21,7 +21,7 @@ $pdo->prepare("UPDATE users SET parent_id = ? WHERE id = ?")
 
 // Assign role to parent user
 $pdo->prepare("INSERT INTO user_permissions (user_id, role) VALUES (?, ?)")
-    ->execute([$parentId, 'user']);
+    ->execute([$parentId, 'admin']);
 
 // Insert second parent sub user
 $subParentPassword = password_hash('parentuser1', PASSWORD_DEFAULT);
