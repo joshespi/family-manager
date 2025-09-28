@@ -23,6 +23,11 @@
                 <?php if (!empty($_SESSION['user_id'])): ?>
                     <nav>
                         <ul class="nav">
+                            <?php if (!empty($role) && $role === 'admin'): ?>
+                                <li class="nav-item">
+                                    <a href="admin.php" class="nav-link text-white">Admin</a>
+                                </li>
+                            <?php endif; ?>
                             <li class="nav-item">
                                 <a href="profile.php" class="nav-link text-white">Profile</a>
                             </li>
