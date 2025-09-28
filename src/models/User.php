@@ -90,6 +90,7 @@ class User
         }
         if ($role === 'admin') {
             $permissions[] = 'admin_user';    // Admin access
+            $permissions[] = 'parent_user';   // Admins also get full family management access
         }
 
         return [
