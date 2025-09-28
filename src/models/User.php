@@ -200,4 +200,19 @@ class User
 
         return true;
     }
+    public static function deleteUser($id)
+    {
+        $pdo = \Database::getConnection();
+
+        // Delete tasks assigned to this user
+        $pdo->prepare("DELETE FROM tasks WHERE assigned_to = ?")->execute([$id]);
+
+        // Delete related user_permissions and user_settings
+        $pdo->prepare("DELETE FROM user_permissions WHERE user_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM user_settings WHERE user_id = ?")->execute([$id]);
+
+        // Then delete the user
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
 }
