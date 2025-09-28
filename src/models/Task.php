@@ -33,7 +33,8 @@ class Task
         $stmt = $pdo->prepare(
             "INSERT INTO tasks (name, description, reward_units, due_date, assigned_to, family_id) VALUES (?, ?, ?, ?, ?, ?)"
         );
-        return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $family_id]);
+        $result = $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $family_id]);
+        return $result ? $pdo->lastInsertId() : false;
     }
     public static function markCompleted($pdo, $id)
     {

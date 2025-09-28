@@ -7,7 +7,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form method="POST" action="/controllers/TaskController.php">
+                <form method="POST">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
                     <div class="mb-3">

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use PDO;
+use App\Models\Logger;
 
 class User
 {
@@ -198,8 +199,18 @@ class User
         $stmt = $pdo->prepare("UPDATE user_permissions SET role = ? WHERE user_id = ?");
         $stmt->execute([$role, $id]);
 
+        // Log the update
+        $actingUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        Logger::log(
+            $pdo,
+            $actingUserId,
+            'UPDATE_USER',
+            "User ID $id updated: username set to '$username', role set to '$role'"
+        );
+
         return true;
     }
+
     public static function deleteUser($id)
     {
         $pdo = \Database::getConnection();
@@ -213,6 +224,17 @@ class User
 
         // Then delete the user
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
-        return $stmt->execute([$id]);
+        $result = $stmt->execute([$id]);
+
+        // Log the deletion
+        $actingUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        Logger::log(
+            $pdo,
+            $actingUserId,
+            'DELETE_USER',
+            "User ID $id deleted"
+        );
+
+        return $result;
     }
 }

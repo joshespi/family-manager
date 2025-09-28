@@ -5,6 +5,7 @@ use App\Controllers\AuthController;
 use App\Controllers\SessionManager;
 use App\Models\User;
 
+$pdo = Database::getConnection();
 $error = '';
 $success = '';
 
@@ -24,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$validation['success']) {
             $error = $validation['message'];
         } else {
-            $result = AuthController::register($username, $password, $role);
+            $result = AuthController::register($username, $password, $role, $pdo);
             if ($result['success']) {
                 $_SESSION['flash'] = "Registration successful! You can now log in.";
                 header("Location: /index.php");

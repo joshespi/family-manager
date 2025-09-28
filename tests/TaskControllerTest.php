@@ -6,42 +6,50 @@ require_once __DIR__ . '/../src/config/database.php';
 use PHPUnit\Framework\TestCase;
 use App\Controllers\TaskController;
 use App\Models\Task;
+use App\Models\User;
 
 class TaskControllerTest extends TestCase
 {
     protected $pdo;
     protected $controller;
+    protected $user;
 
     protected function setUp(): void
     {
-        $this->pdo = \Database::getConnection();
+        $this->pdo = Database::getConnection();
 
         // Clear tables to avoid FK constraint issues
         $this->pdo->exec("DELETE FROM tasks");
         $this->pdo->exec("DELETE FROM users");
-
-        // Insert a user for assignment
-        $this->pdo->exec("INSERT INTO users (username, password) VALUES ('testuser', 'pass')");
+        $this->pdo->exec("DELETE FROM user_permissions");
+        $this->pdo->exec("DELETE FROM user_settings");
+        $this->pdo->exec("DELETE FROM change_log");
 
         $this->controller = new TaskController($this->pdo);
+        $this->user = new User($this->pdo);
     }
 
     public function testCreateTaskAndGetTask()
     {
-        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
+        $this->user->create('testuser1', 'testpass1', 'user');
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
+        $stmt->execute(['testuser1']);
+        $userId = $stmt->fetchColumn();
+
         $data = [
             'name' => 'Controller Task',
             'description' => 'Created via controller',
             'reward_units' => 10.5,
             'due_date' => '2025-09-15',
             'assigned_to' => $userId,
-            'family_id' => 1
+            'family_id' => $userId
         ];
-        $result = $this->controller->createTask($data);
-        $this->assertTrue($result);
 
-        $taskId = $this->pdo->lastInsertId();
+        $taskId = $this->controller->createTask($data);
+        $this->assertNotFalse($taskId, 'Task creation failed');
+
         $task = $this->controller->getTask($taskId);
+        $this->assertNotNull($task, 'Task not found in database');
         $this->assertEquals('Controller Task', $task['name']);
         $this->assertEquals('Created via controller', $task['description']);
         $this->assertEquals(10.5, $task['reward_units']);
@@ -77,10 +85,11 @@ class TaskControllerTest extends TestCase
 
     public function testGetTasksAssignedToUser()
     {
-        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
+        $this->pdo->exec("INSERT INTO users (username, password) VALUES ('testuser1', 'testpass1')");
+        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser1'")->fetchColumn();
 
         // Insert another user
-        $this->pdo->exec("INSERT INTO users (username, password) VALUES ('otheruser', 'pass')");
+        $this->pdo->exec("INSERT INTO users (username, password) VALUES ('otheruser', 'otherpass1')");
         $otherUserId = $this->pdo->query("SELECT id FROM users WHERE username = 'otheruser'")->fetchColumn();
 
         // Insert tasks for testuser in family 1
@@ -119,7 +128,7 @@ class TaskControllerTest extends TestCase
             'family_id' => 1
         ]);
 
-        $tasks = $this->controller->getTasksAssignedToUser(1, $userId);
+        $tasks = $this->controller->getOpenTasksAssignedToUser(1, $userId);
         $this->assertCount(2, $tasks);
         $taskNames = array_column($tasks, 'name');
         $this->assertContains('User Task 1', $taskNames);
