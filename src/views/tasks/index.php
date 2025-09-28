@@ -39,7 +39,11 @@ if (isset($permissions) && in_array('parent_user', $permissions)) {
 if (empty($tasks)): ?>
     <div class="alert alert-info">No tasks available.</div>
 <?php else: ?>
-    <h2 class="mb-4">Family Tasks</h2>
+    <?php if (isset($permissions) && in_array('child_user', $permissions)): ?>
+        <h2 class="mb-4">My Tasks</h2>
+    <?php else: ?>
+        <h2 class="mb-4">Family Tasks</h2>
+    <?php endif; ?>
     <div class="row g-3">
 
         <?php foreach ($tasks as $task): ?>
