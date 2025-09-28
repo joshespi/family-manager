@@ -88,6 +88,10 @@ class User
         if ($role === 'child') {
             $permissions[] = 'child_user';    // Limited access
         }
+        if ($role === 'admin') {
+            $permissions[] = 'admin_user';    // Admin access
+            $permissions[] = 'parent_user';   // Admins also get full family management access
+        }
 
         return [
             'role' => $role,
@@ -164,5 +168,51 @@ class User
         $stmt = $pdo->prepare("SELECT role FROM user_permissions WHERE user_id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchColumn() ?: 'child';
+    }
+    public static function fetchAllWithPermissionsAndSettings($pdo)
+    {
+        $stmt = $pdo->prepare(
+            "SELECT 
+                u.id, 
+                u.username, 
+                u.parent_id, 
+                up.role, 
+                us.name AS display_name
+            FROM users u
+            LEFT JOIN user_permissions up ON u.id = up.user_id
+            LEFT JOIN user_settings us ON u.id = us.user_id
+            ORDER BY u.id ASC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    public static function updateUser($id, $username, $role)
+    {
+        $pdo = \Database::getConnection();
+
+        // Update username
+        $stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
+        $stmt->execute([$username, $id]);
+
+        // Update role
+        $stmt = $pdo->prepare("UPDATE user_permissions SET role = ? WHERE user_id = ?");
+        $stmt->execute([$role, $id]);
+
+        return true;
+    }
+    public static function deleteUser($id)
+    {
+        $pdo = \Database::getConnection();
+
+        // Delete tasks assigned to this user
+        $pdo->prepare("DELETE FROM tasks WHERE assigned_to = ?")->execute([$id]);
+
+        // Delete related user_permissions and user_settings
+        $pdo->prepare("DELETE FROM user_permissions WHERE user_id = ?")->execute([$id]);
+        $pdo->prepare("DELETE FROM user_settings WHERE user_id = ?")->execute([$id]);
+
+        // Then delete the user
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        return $stmt->execute([$id]);
     }
 }

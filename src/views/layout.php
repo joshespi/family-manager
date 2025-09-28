@@ -23,6 +23,11 @@
                 <?php if (!empty($_SESSION['user_id'])): ?>
                     <nav>
                         <ul class="nav">
+                            <?php if (!empty($role) && $role === 'admin'): ?>
+                                <li class="nav-item">
+                                    <a href="admin.php" class="nav-link text-white">Admin</a>
+                                </li>
+                            <?php endif; ?>
                             <li class="nav-item">
                                 <a href="profile.php" class="nav-link text-white">Profile</a>
                             </li>
@@ -39,28 +44,18 @@
         <?php if (!empty($message)): ?>
             <div class="alert alert-info"><?= htmlspecialchars($message) ?></div>
         <?php endif; ?>
+        <h1><?= $title ?></h1>
         <?= $content ?>
     </main>
     <footer class="bg-light text-center py-3 mt-auto border-top">
-        <p class="mb-0">&copy; <?= date('Y') ?> Family Manager</p>
+        <div class="d-flex justify-content-center flex-wrap gap-2">
+            <p class="mb-0">Version <?= htmlspecialchars($app_Version) ?></p>
+            <p class="mb-0"> | &copy; <?= date('Y') ?> Family Manager</p>
+            <p class="mb-0"> | <a href="https://github.com/joshespi/family-manager/issues">Issue Tracker/Feature Request</a></p>
+        </div>
     </footer>
     <?php
-    $devMode = filter_var($_ENV['DEV_MODE'] ?? false, FILTER_VALIDATE_BOOLEAN);
-    if ($devMode) {
-        echo '<div class="container my-4">';
-        echo '<div class="card border-danger">';
-        echo '<div class="card-header bg-danger text-white">Debug Info</div>';
-        echo '<div class="card-body">';
-        echo '<pre class="mb-0">';
-        echo '<strong>$_SESSION:</strong>' . "\n" . print_r($_SESSION, true) . "\n";
-        echo "<strong>Permissions</strong>: \n" . print_r($permissions ?? [], true) . "\n";
-        echo '<strong>Role</strong>: ' . print_r($role ?? 'N/A', true) . "\n";
-        echo '<strong>$_POST</strong>:' . "\n" . print_r($_POST, true) . "\n";
-        echo '</pre>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-    }
+    include __DIR__ . '/debug.php';
     ?>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 

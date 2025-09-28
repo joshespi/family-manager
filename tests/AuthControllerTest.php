@@ -138,4 +138,35 @@ class AuthControllerTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Invalid role for sub-account.', $result['message']);
     }
+    public function testEditUser()
+    {
+        // Create user
+        $username = 'editme_' . uniqid();
+        $password = 'EditPass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = User::findByUsername($username);
+
+        // Edit user
+        User::updateUser($user['id'], 'editeduser', 'parent');
+        $edited = User::findById($user['id']);
+        $this->assertEquals('editeduser', $edited['username']);
+        $this->assertEquals('parent', User::getRole(Database::getConnection(), $user['id']));
+    }
+
+    public function testDeleteUser()
+    {
+        // Create user
+        $username = 'deleteme_' . uniqid();
+        $password = 'DeletePass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = User::findByUsername($username);
+
+        // Delete user
+        $result = User::deleteUser($user['id']);
+        $this->assertTrue($result);
+        $deleted = User::findById($user['id']);
+        $this->assertFalse($deleted);
+    }
 }

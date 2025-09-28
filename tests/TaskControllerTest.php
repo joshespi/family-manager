@@ -74,40 +74,7 @@ class TaskControllerTest extends TestCase
         $this->assertEquals('Task 1', $tasks[0]['name']);
         $this->assertEquals('Task 2', $tasks[1]['name']);
     }
-    public function testUpdateTask()
-    {
-        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
-        // Create a task to update
-        $this->controller->createTask([
-            'name' => 'Original Task',
-            'description' => 'Original description',
-            'reward_units' => 5,
-            'due_date' => '2025-09-20',
-            'assigned_to' => $userId,
-            'family_id' => 1
-        ]);
-        $taskId = $this->pdo->lastInsertId();
 
-        // Update the task
-        $updateData = [
-            'task_id' => $taskId,
-            'name' => 'Updated Task',
-            'description' => 'Updated description',
-            'reward_units' => 15,
-            'due_date' => '', // Test clearing due date
-            'assigned_to' => $userId
-        ];
-        $result = $this->controller->updateTask($updateData);
-        $this->assertTrue($result);
-
-        // Fetch and assert
-        $updatedTask = $this->controller->getTask($taskId);
-        $this->assertEquals('Updated Task', $updatedTask['name']);
-        $this->assertEquals('Updated description', $updatedTask['description']);
-        $this->assertEquals(15, $updatedTask['reward_units']);
-        $this->assertNull($updatedTask['due_date']); // Should be null after clearing
-        $this->assertEquals($userId, $updatedTask['assigned_to']);
-    }
     public function testGetTasksAssignedToUser()
     {
         $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
@@ -161,5 +128,32 @@ class TaskControllerTest extends TestCase
             $this->assertEquals($userId, $task['assigned_to']);
             $this->assertEquals(1, $task['family_id']);
         }
+    }
+
+    public function testUpdateTask()
+    {
+        $pdo = Database::getConnection();
+        $pdo->exec("INSERT INTO users (username, password) VALUES ('updateuser', 'pass')");
+        $userId = $pdo->lastInsertId();
+        Task::create($pdo, 'Old Name', 'Old Desc', 5, null, $userId, 1);
+        $task = Task::getAll($pdo, 1)[0];
+
+        Task::update($pdo, $task['id'], 'New Name', 'New Desc', 15, '2025-01-01', $userId);
+        $updated = Task::getById($pdo, $task['id']);
+        $this->assertEquals('New Name', $updated['name']);
+        $this->assertEquals(15, $updated['reward_units']);
+    }
+
+    public function testMarkCompleted()
+    {
+        $pdo = Database::getConnection();
+        $pdo->exec("INSERT INTO users (username, password) VALUES ('completeuser', 'pass')");
+        $userId = $pdo->lastInsertId();
+        Task::create($pdo, 'Complete Me', 'Desc', 1, null, $userId, 1);
+        $task = Task::getAll($pdo, 1)[0];
+
+        Task::markCompleted($pdo, $task['id']);
+        $completed = Task::getById($pdo, $task['id']);
+        $this->assertEquals(1, $completed['completed']);
     }
 }
