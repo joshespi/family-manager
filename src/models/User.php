@@ -186,4 +186,18 @@ class User
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+    public static function updateUser($id, $username, $role)
+    {
+        $pdo = \Database::getConnection();
+
+        // Update username
+        $stmt = $pdo->prepare("UPDATE users SET username = ? WHERE id = ?");
+        $stmt->execute([$username, $id]);
+
+        // Update role
+        $stmt = $pdo->prepare("UPDATE user_permissions SET role = ? WHERE user_id = ?");
+        $stmt->execute([$role, $id]);
+
+        return true;
+    }
 }
