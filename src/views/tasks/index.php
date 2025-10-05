@@ -76,7 +76,7 @@ if ($isParent) {
         <strong>Note:</strong> As a parent, you can see and manage all tasks for the family. Children can only see tasks assigned to them.
     </div>
     <?php if (empty($completedTasks)): ?>
-        <div class="alert alert-info mt-4">No Family Completed TAsks.</div>
+        <div class="alert alert-info mt-4">No Family Completed Tasks.</div>
     <?php else: ?>
         <h2 class="mt-5 mb-4">My Completed Tasks</h2>
         <?php $tasks = $completedTasks;
