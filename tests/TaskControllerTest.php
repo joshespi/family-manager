@@ -5,8 +5,8 @@ require_once __DIR__ . '/../src/config/database.php';
 
 use PHPUnit\Framework\TestCase;
 use App\Controllers\TaskController;
-use App\Models\Task;
-use App\Models\User;
+use App\Controllers\AuthController;
+
 
 class TaskControllerTest extends TestCase
 {
@@ -17,6 +17,7 @@ class TaskControllerTest extends TestCase
     protected function setUp(): void
     {
         $this->pdo = Database::getConnection();
+        $GLOBALS['pdo'] = $this->pdo;
 
         // Clear tables to avoid FK constraint issues
         $this->pdo->exec("DELETE FROM tasks");
@@ -26,12 +27,12 @@ class TaskControllerTest extends TestCase
         $this->pdo->exec("DELETE FROM change_log");
 
         $this->controller = new TaskController($this->pdo);
-        $this->user = new User($this->pdo);
+        $this->user = new AuthController($this->pdo);
     }
 
     public function testCreateTaskAndGetTask()
     {
-        $this->user->create('testuser1', 'testpass1', 'user');
+        $this->user->register('testuser1', 'testpass1', 'user');
         $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->execute(['testuser1']);
         $userId = $stmt->fetchColumn();
@@ -59,14 +60,16 @@ class TaskControllerTest extends TestCase
 
     public function testGetAllTasks()
     {
-        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser'")->fetchColumn();
+        $this->user->register('testuser1', 'testpass1', 'user');
+        $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser1'")->fetchColumn();
+        $familyId = $this->pdo->query("SELECT parent_id FROM users WHERE username = 'testuser1'")->fetchColumn();
         $this->controller->createTask([
             'name' => 'Task 1',
             'description' => 'Desc 1',
             'reward_units' => 1,
             'due_date' => null,
             'assigned_to' => $userId,
-            'family_id' => 1
+            'family_id' => $familyId
         ]);
         $this->controller->createTask([
             'name' => 'Task 2',
@@ -74,10 +77,10 @@ class TaskControllerTest extends TestCase
             'reward_units' => 2,
             'due_date' => null,
             'assigned_to' => $userId,
-            'family_id' => 1
+            'family_id' => $familyId
         ]);
 
-        $tasks = $this->controller->getAllTasks($family_id = 1);
+        $tasks = $this->controller->getAllTasks($familyId);
         $this->assertCount(2, $tasks);
         $this->assertEquals('Task 1', $tasks[0]['name']);
         $this->assertEquals('Task 2', $tasks[1]['name']);
@@ -85,7 +88,7 @@ class TaskControllerTest extends TestCase
 
     public function testGetTasksAssignedToUser()
     {
-        $this->pdo->exec("INSERT INTO users (username, password) VALUES ('testuser1', 'testpass1')");
+        $this->user->register('testuser1', 'testpass1', 'user');
         $userId = $this->pdo->query("SELECT id FROM users WHERE username = 'testuser1'")->fetchColumn();
 
         // Insert another user
@@ -128,7 +131,7 @@ class TaskControllerTest extends TestCase
             'family_id' => 1
         ]);
 
-        $tasks = Task::getOpenTasksAssignedToUser($this->pdo, 1, $userId);
+        $tasks = $this->controller->getOpenTasksAssignedToUser(1, $userId);
         $this->assertCount(2, $tasks);
         $taskNames = array_column($tasks, 'name');
         $this->assertContains('User Task 1', $taskNames);
@@ -141,26 +144,45 @@ class TaskControllerTest extends TestCase
 
     public function testUpdateTask()
     {
-        $pdo = Database::getConnection();
-        $pdo->exec("INSERT INTO users (username, password) VALUES ('updateuser', 'pass')");
-        $userId = $pdo->lastInsertId();
-        Task::create($pdo, 'Old Name', 'Old Desc', 5, null, $userId, 1);
-        $task = Task::getAll($pdo, 1)[0];
+        $this->user->register('testuser1', 'testpass1', 'user');
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
+        $stmt->execute(['testuser1']);
+        $userId = $stmt->fetchColumn();
+        $familyId = $this->pdo->query("SELECT parent_id FROM users WHERE username = 'testuser1'")->fetchColumn();
 
-        Task::update($pdo, $task['id'], 'New Name', 'New Desc', 15, '2025-01-01', $userId);
-        $updated = Task::getById($pdo, $task['id']);
+
+        $this->controller->createTask([
+            'name' => 'Old Name',
+            'description' => 'Old Desc',
+            'reward_units' => 5,
+            'due_date' => null,
+            'assigned_to' => $userId,
+            'family_id' => $familyId
+        ]);
+        $task = $this->controller->getAllTasks($familyId)[0];
+
+        $this->controller->updateTask([
+            'task_id' => $task['id'],
+            'name' => 'New Name',
+            'description' => 'New Desc',
+            'reward_units' => 15,
+            'due_date' => '2025-12-31',
+            'assigned_to' => $userId,
+            'family_id' => $familyId
+        ]);
+        $updated = $this->controller->getTask($task['id']);
         $this->assertEquals('New Name', $updated['name']);
         $this->assertEquals(15, $updated['reward_units']);
     }
 
     public function testMarkCompletedUncomplete()
     {
-        $this->user->create('completeuser1', 'passtest1', 'user');
+        $this->user->register('completeuser1', 'passtest1', 'user');
         $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
         $stmt->execute(['completeuser1']);
         $userId = $stmt->fetchColumn();
         $this->assertNotEmpty($userId, 'User ID should not be empty');
-        $parent_id = User::getParentId($this->pdo, $userId); // Assuming family_id is same as
+        $parent_id = $this->user->getParentID($userId); // Assuming family_id is same as
         // $this->assertNotEmpty($parent_id, 'Parent ID should not be empty');
         $taskId = $this->controller->createTask([
             'name' => 'Complete Me',
