@@ -6,11 +6,15 @@ use App\Models\User;
 $pdo = Database::getConnection();
 $family_id = User::getParentId($pdo, $_SESSION['user_id']);
 $taskController = new TaskController($pdo);
+$completedTasksUser = $taskController->getCompletedTasksAssignedToUser($family_id, $_SESSION['user_id']);
+$completedTasks = $taskController->getCompletedTasksForFamily($family_id);
+
+$isParent = isset($permissions) && in_array('parent_user', $permissions);
+$isChild = isset($permissions) && in_array('child_user', $permissions);
 
 // Handle task POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $taskController = new TaskController($pdo);
-
     if ($_POST['action'] === 'edit') {
         $taskController->updateTask([
             'task_id' => (int)$_POST['task_id'],
@@ -21,10 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             'assigned_to' => (int)$_POST['assigned_to'],
         ]);
         $_SESSION['system_message'] = "Task updated!";
-        error_log("Task updated: " . print_r($_POST, true));
-    } elseif ($_POST['action'] === 'complete') {
-        $taskController->completeTask((int)$_POST['task_id']);
-        $_SESSION['system_message'] = "Task marked as complete!";
     }
 
     header("Location: " . $_SERVER['REQUEST_URI']);
@@ -32,10 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // Task retrieval logic
-$isParent = isset($permissions) && in_array('parent_user', $permissions);
-$isChild = isset($permissions) && in_array('child_user', $permissions);
-
-
 // Permissions-based task retrieval
 if ($isChild) {
     // Children: only their assigned tasks
@@ -71,6 +67,27 @@ if ($isParent) {
         <div class="alert alert-info">No family tasks available.</div>
     <?php else: ?>
         <?php $tasks = $allFamilyTasks;
+        include __DIR__ . '/task_list.php'; ?>
+    <?php endif; ?>
+<?php endif; ?>
+
+<?php if ($isParent): ?>
+    <div class="alert alert-warning mt-4">
+        <strong>Note:</strong> As a parent, you can see and manage all tasks for the family. Children can only see tasks assigned to them.
+    </div>
+    <?php if (empty($completedTasks)): ?>
+        <div class="alert alert-info mt-4">No Family Completed TAsks.</div>
+    <?php else: ?>
+        <h2 class="mt-5 mb-4">My Completed Tasks</h2>
+        <?php $tasks = $completedTasks;
+        include __DIR__ . '/task_list.php'; ?>
+    <?php endif; ?>
+<?php elseif ($isChild): ?>
+    <?php if (empty($completedTasksUser)): ?>
+        <div class="alert alert-info mt-4">No Completed Tasks.</div>
+    <?php else: ?>
+        <h2 class="mt-5 mb-4">My Completed Tasks</h2>
+        <?php $tasks = $completedTasksUser;
         include __DIR__ . '/task_list.php'; ?>
     <?php endif; ?>
 <?php endif; ?>

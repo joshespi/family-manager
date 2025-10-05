@@ -50,4 +50,32 @@ class Task
         );
         return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $id]);
     }
+    public function uncomplete($pdo, $taskId)
+    {
+        $stmt = $pdo->prepare("UPDATE tasks SET completed = 0 WHERE id = ?");
+        return $stmt->execute([$taskId]);
+    }
+    public static function getOpenTasksAssignedToUser($pdo, $family_id, $user_id)
+    {
+        $stmt = $pdo->prepare("SELECT * FROM tasks WHERE family_id = ? AND assigned_to = ? AND completed = 0");
+        $stmt->execute([$family_id, $user_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    public static function getCompletedTasksAssignedToUser($pdo, $family_id, $user_id)
+    {
+        $stmt = $pdo->prepare(
+            "SELECT * FROM tasks WHERE family_id = :family_id AND assigned_to = :user_id AND completed = 1"
+        );
+        $stmt->execute([
+            ':family_id' => $family_id,
+            ':user_id' => $user_id
+        ]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+    public static function getCompletedTasksForFamily($pdo, $family_id)
+    {
+        $stmt = $pdo->prepare("SELECT * FROM tasks WHERE family_id = ? AND completed = 1");
+        $stmt->execute([$family_id]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

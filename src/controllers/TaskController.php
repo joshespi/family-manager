@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Task;
-use App\Models\Logger;
+use App\Controllers\Logger;
 
 class TaskController
 {
@@ -42,7 +42,7 @@ class TaskController
         // Log the task creation if successful
         if ($result) {
             $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-            Logger::log(
+            LoggerController::log(
                 $this->pdo,
                 $userId,
                 'CREATE_TASK',
@@ -60,7 +60,7 @@ class TaskController
         if ($result) {
             // Get current user ID from session or context
             $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-            Logger::log(
+            LoggerController::log(
                 $this->pdo,
                 $userId,
                 'COMPLETE_TASK',
@@ -86,7 +86,7 @@ class TaskController
         // Log the task update if successful
         if ($result) {
             $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-            Logger::log(
+            LoggerController::log(
                 $this->pdo,
                 $userId,
                 'UPDATE_TASK',
@@ -96,10 +96,32 @@ class TaskController
 
         return $result;
     }
+
+    public function uncompleteTask($taskId)
+    {
+
+        $taskModel = new Task();
+        $taskModel->uncomplete($this->pdo, $taskId);
+        $_SESSION['system_message'] = "Task marked as incomplete.";
+        $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        LoggerController::log(
+            $this->pdo,
+            $userId,
+            'UNCOMPLETE_TASK',
+            "Task ID $taskId marked as incomplete by user ID $userId"
+        );
+        return true;
+    }
     public function getOpenTasksAssignedToUser($family_id, $user_id)
     {
-        $stmt = $this->pdo->prepare("SELECT * FROM tasks WHERE family_id = ? AND assigned_to = ? AND completed = 0");
-        $stmt->execute([$family_id, $user_id]);
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        return Task::getOpenTasksAssignedToUser($this->pdo, $family_id, $user_id);
+    }
+    public function getCompletedTasksAssignedToUser($family_id, $user_id)
+    {
+        return Task::getCompletedTasksAssignedToUser($this->pdo, $family_id, $user_id);
+    }
+    public function getCompletedTasksForFamily($family_id)
+    {
+        return Task::getCompletedTasksForFamily($this->pdo, $family_id);
     }
 }

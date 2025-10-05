@@ -22,8 +22,12 @@ use App\Models\User;
                     <div class="mt-auto d-flex align-items-center">
                         <?php if (empty($task['completed'])): ?>
                             <form method="POST" class="me-2">
-                                <input type="hidden" name="complete_task_id" value="<?= $task['id'] ?>">
+                                <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
+                                <input type="hidden" name="action" value="complete">
                                 <button type="submit" class="btn btn-success btn-sm">Complete</button>
+                            </form>
+                            <form method="POST" class="me-2">
+
                                 <!-- Edit Button (shows modal) -->
                                 <?php if ($isParent):
                                     include __DIR__ . '/edit.php';
@@ -37,7 +41,11 @@ use App\Models\User;
                                 <?php endif; ?>
                             </form>
                         <?php else: ?>
-                            <span class="badge bg-success">Completed</span>
+                            <form method="POST" class="mt-auto">
+                                <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
+                                <input type="hidden" name="action" value="uncomplete">
+                                <button type="submit" class="btn btn-warning btn-sm">Uncomplete</button>
+                            </form>
                         <?php endif; ?>
                     </div>
                 </div>

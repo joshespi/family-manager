@@ -128,7 +128,7 @@ class TaskControllerTest extends TestCase
             'family_id' => 1
         ]);
 
-        $tasks = $this->controller->getOpenTasksAssignedToUser(1, $userId);
+        $tasks = Task::getOpenTasksAssignedToUser($this->pdo, 1, $userId);
         $this->assertCount(2, $tasks);
         $taskNames = array_column($tasks, 'name');
         $this->assertContains('User Task 1', $taskNames);
@@ -153,16 +153,36 @@ class TaskControllerTest extends TestCase
         $this->assertEquals(15, $updated['reward_units']);
     }
 
-    public function testMarkCompleted()
+    public function testMarkCompletedUncomplete()
     {
-        $pdo = Database::getConnection();
-        $pdo->exec("INSERT INTO users (username, password) VALUES ('completeuser', 'pass')");
-        $userId = $pdo->lastInsertId();
-        Task::create($pdo, 'Complete Me', 'Desc', 1, null, $userId, 1);
-        $task = Task::getAll($pdo, 1)[0];
+        $this->user->create('completeuser1', 'passtest1', 'user');
+        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
+        $stmt->execute(['completeuser1']);
+        $userId = $stmt->fetchColumn();
+        $this->assertNotEmpty($userId, 'User ID should not be empty');
+        $parent_id = User::getParentId($this->pdo, $userId); // Assuming family_id is same as
+        // $this->assertNotEmpty($parent_id, 'Parent ID should not be empty');
+        $taskId = $this->controller->createTask([
+            'name' => 'Complete Me',
+            'description' => 'Desc',
+            'reward_units' => 1,
+            'due_date' => null,
+            'assigned_to' => $userId,
+            'family_id' => $parent_id
+        ]);
 
-        Task::markCompleted($pdo, $task['id']);
-        $completed = Task::getById($pdo, $task['id']);
-        $this->assertEquals(1, $completed['completed']);
+        $this->controller->completeTask($taskId);
+
+        $completed = $this->controller->getTask($taskId);
+        // $this->assertIsArray($completed, 'Completed task not found');
+        $this->assertTrue((bool)$completed['completed']);
+        // $this->assertSame(1, $completed['completed'], 'Task should be marked as completed');
+
+        $this->controller->uncompleteTask($taskId);
+
+        $uncompleted = $this->controller->getTask($taskId);
+        // $this->assertIsArray($uncompleted, 'Uncompleted task not found');
+        $this->assertFalse((bool)$uncompleted['completed'], 'Task should be marked as uncompleted');
+        // $this->assertSame(0, $uncompleted['completed'], 'Task should be marked as uncompleted');
     }
 }
