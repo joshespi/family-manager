@@ -4,7 +4,6 @@ require_once __DIR__ . '/../src/config/database.php';
 
 use PHPUnit\Framework\TestCase;
 use App\Controllers\AuthController;
-use App\Models\User;
 
 
 class AuthControllerTest extends TestCase
@@ -78,7 +77,7 @@ class AuthControllerTest extends TestCase
         $role = 'user';
 
         AuthController::register($username, $password, $role);
-        $user = User::findByUsername($username);
+        $user = AuthController::getUserByUsername($username);
 
         // Password in DB should not match plain password
         $this->assertNotEquals($password, $user['password']);
@@ -122,7 +121,7 @@ class AuthControllerTest extends TestCase
         $parentResult = AuthController::register($parentUsername, $parentPassword, $parentRole);
         $this->assertTrue($parentResult['success']);
 
-        $parent = User::findByUsername($parentUsername);
+        $parent = AuthController::getUserByUsername($parentUsername);
 
         // parent creates a child sub-account
         $subUsername = 'child_' . uniqid();
@@ -133,7 +132,7 @@ class AuthControllerTest extends TestCase
         $this->assertTrue($result['success']);
 
         // non-parent (no permission) cannot create sub-account
-        $child = User::findByUsername($subUsername);
+        $child = AuthController::getUserByUsername($subUsername);
 
         $result = AuthController::createSubAccount($child['id'], 'subuser1', $subPassword, 'child');
         $this->assertIsArray($result);
@@ -153,13 +152,13 @@ class AuthControllerTest extends TestCase
         $password = 'EditPass123';
         $role = 'user';
         AuthController::register($username, $password, $role);
-        $user = User::findByUsername($username);
+        $user = AuthController::getUserByUsername($username);
 
         // Edit user
-        User::updateUser($user['id'], 'editeduser', 'parent');
-        $edited = User::findById($user['id']);
+        AuthController::updateUser($user['id'], 'editeduser', 'parent');
+        $edited = AuthController::getUserById($user['id']);
         $this->assertEquals('editeduser', $edited['username']);
-        $this->assertEquals('parent', User::getRole(Database::getConnection(), $user['id']));
+        $this->assertEquals('parent', AuthController::getUserRole($user['id']));
     }
 
     public function testDeleteUser()
@@ -169,12 +168,12 @@ class AuthControllerTest extends TestCase
         $password = 'DeletePass123';
         $role = 'user';
         AuthController::register($username, $password, $role);
-        $user = User::findByUsername($username);
-
+        $user = AuthController::getUserByUsername($username);
+        $this->assertNotFalse($user);
         // Delete user
-        $result = User::deleteUser($user['id']);
+        $result = AuthController::deleteUser($user['id']);
         $this->assertTrue($result);
-        $deleted = User::findById($user['id']);
+        $deleted = AuthController::getUserById($user['id']);
         $this->assertFalse($deleted);
     }
 }

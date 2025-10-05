@@ -94,4 +94,54 @@ class AuthController
         $user = User::findById($user_id);
         return $user ? $user['parent_id'] : null;
     }
+    public static function getUserByUsername($username)
+    {
+        return User::findByUsername($username);
+    }
+    public static function getUserById($id)
+    {
+        return User::findById($id);
+    }
+    public static function deleteUser($user_id)
+    {
+        $user = User::findById($user_id);
+        if (!$user) {
+            return false;
+        }
+
+        $result = User::deleteUser($user_id);
+        if ($result) {
+            // Log the deletion
+            global $pdo;
+            LoggerController::log($pdo, null, 'DELETE_USER', "User deleted: ID $user_id");
+        }
+        return $result;
+    }
+    public static function updateUser($user_id, $newUsername, $newRole)
+    {
+        $user = User::findById($user_id);
+        if (!$user) {
+            return ['success' => false, 'message' => 'User not found.'];
+        }
+        $allowedRoles = ['user', 'admin', 'parent', 'child'];
+        if (!in_array($newRole, $allowedRoles)) {
+            return ['success' => false, 'message' => 'Invalid role specified.'];
+        }
+        if ($newUsername !== $user['username'] && User::findByUsername($newUsername)) {
+            return ['success' => false, 'message' => 'Username already exists.'];
+        }
+
+        $result = User::updateUser($user_id, $newUsername, $newRole);
+        if ($result) {
+            // Log the update
+            global $pdo;
+            LoggerController::log($pdo, null, 'UPDATE_USER', "User updated: ID $user_id to $newUsername ($newRole)");
+            return ['success' => true, 'message' => 'User updated successfully.'];
+        }
+        return ['success' => false, 'message' => 'Update failed.'];
+    }
+    public static function getUserRole($userId)
+    {
+        return User::getRole($userId);
+    }
 }
