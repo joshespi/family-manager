@@ -14,7 +14,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
       - DB_NAME=${DB_NAME}
-      - APP_VERSION=1.4.0
+      - APP_VERSION=1.5.0
       - DEV_MODE=${DEV_MODE}
     restart: always
     depends_on:
