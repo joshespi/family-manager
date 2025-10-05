@@ -3,7 +3,7 @@ require_once __DIR__ . '/start.php';
 
 use App\Controllers\AuthController;
 use App\Controllers\SessionManager;
-use App\Models\User;
+
 
 $pdo = Database::getConnection();
 $error = '';
@@ -17,22 +17,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Input validation & sanitization
         $username = trim($_POST['username'] ?? '');
+        $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
         $password = $_POST['password'] ?? '';
         $role = $_POST['role'] ?? 'user';
 
-        $validation = User::validateCredentials($username, $password);
 
-        if (!$validation['success']) {
-            $error = $validation['message'];
+        $result = AuthController::register($username, $password, $role, $pdo);
+        if ($result['success']) {
+            $_SESSION['flash'] = "Registration successful! You can now log in.";
+            header("Location: /index.php");
+            exit;
         } else {
-            $result = AuthController::register($username, $password, $role, $pdo);
-            if ($result['success']) {
-                $_SESSION['flash'] = "Registration successful! You can now log in.";
-                header("Location: /index.php");
-                exit;
-            } else {
-                $error = $result['message'];
-            }
+            $error = $result['message'];
         }
     }
 }

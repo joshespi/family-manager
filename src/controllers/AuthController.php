@@ -10,7 +10,7 @@ class AuthController
     public static function login($username, $password)
     {
 
-        $user = User::findByUsername($username);
+        $user = AuthController::getUserByUsername($username);
         if ($user && password_verify($password, $user['password'])) {
             SessionManager::regenerate();
             SessionManager::set('user_id', $user['id']);
@@ -28,6 +28,7 @@ class AuthController
     {
         return SessionManager::get('user_id') !== null;
     }
+
     public static function register($username, $password, $role)
     {
         if (empty($username) || empty($password)) {
@@ -44,7 +45,7 @@ class AuthController
         if (!$validation['success']) {
             return $validation;
         }
-        if (User::findByUsername($username)) {
+        if (AuthController::getUserByUsername($username)) {
             return ['success' => false, 'message' => 'Username already exists.'];
         }
 
@@ -143,5 +144,17 @@ class AuthController
     public static function getUserRole($userId)
     {
         return User::getRole($userId);
+    }
+    public static function getUserPermissionsAndSettings()
+    {
+        return User::fetchAllWithPermissionsAndSettings();
+    }
+    public static function getUserPermissions($userId)
+    {
+        return User::getPermissions($userId);
+    }
+    public static function getSubAccounts($parentId)
+    {
+        return User::getSubAccounts($parentId);
     }
 }

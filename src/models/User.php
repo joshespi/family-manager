@@ -171,8 +171,9 @@ class User
         $stmt->execute([$userId]);
         return $stmt->fetchColumn() ?: 'child';
     }
-    public static function fetchAllWithPermissionsAndSettings($pdo)
+    public static function fetchAllWithPermissionsAndSettings()
     {
+        $pdo = \Database::getConnection();
         $stmt = $pdo->prepare(
             "SELECT 
                 u.id, 

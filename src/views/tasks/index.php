@@ -40,6 +40,10 @@ if ($isChild) {
     // Parents: all family tasks and their own assigned tasks
     $allFamilyTasks = $taskController->getAllTasks($family_id);
     $myTasks = $taskController->getOpenTasksAssignedToUser($family_id, $_SESSION['user_id']);
+    // Filter out tasks assigned to the current user from family tasks
+    $allFamilyTasks = array_filter($allFamilyTasks, function ($task) {
+        return $task['assigned_to'] != $_SESSION['user_id'];
+    });
     $tasks = $allFamilyTasks; // Default display is all family tasks
 } else {
     // Fallback: show nothing
@@ -64,7 +68,7 @@ if ($isParent) {
 <?php if ($isParent): ?>
     <h2 class="mt-5 mb-4">Family Tasks</h2>
     <?php if (empty($allFamilyTasks)): ?>
-        <div class="alert alert-info">No family tasks available.</div>
+        <div class="alert alert-info">No family tasks available or all tasks assigned to you.</div>
     <?php else: ?>
         <?php $tasks = $allFamilyTasks;
         include __DIR__ . '/task_list.php'; ?>
@@ -72,12 +76,10 @@ if ($isParent) {
 <?php endif; ?>
 
 <?php if ($isParent): ?>
-    <div class="alert alert-warning mt-4">
-        <strong>Note:</strong> As a parent, you can see and manage all tasks for the family. Children can only see tasks assigned to them.
-    </div>
-    <?php if (empty($completedTasks)): ?>
-        <div class="alert alert-info mt-4">No Family Completed Tasks.</div>
-    <?php else: ?>
+    <?php if (!empty($completedTasks)): ?>
+        <div class="alert alert-warning mt-4">
+            <strong>Note:</strong> As a parent, you can see and manage all tasks for the family. Children can only see tasks assigned to them.
+        </div>
         <h2 class="mt-5 mb-4">My Completed Tasks</h2>
         <?php $tasks = $completedTasks;
         include __DIR__ . '/task_list.php'; ?>

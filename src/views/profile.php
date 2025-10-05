@@ -1,4 +1,8 @@
-<?php if (!empty($_SESSION['message'])): ?>
+<?php
+
+use App\Controllers\AuthController;
+
+if (!empty($_SESSION['message'])): ?>
     <div class="alert alert-info"><?= htmlspecialchars($_SESSION['message']) ?></div>
     <?php unset($_SESSION['message']); ?>
 <?php endif; ?>
@@ -64,7 +68,7 @@
                     <?php foreach ($subAccounts as $sub): ?>
                         <tr>
                             <td><?= htmlspecialchars($sub['username']) ?></td>
-                            <td><?= htmlspecialchars(\App\Models\User::getRole($pdo, $sub['id'])) ?></td>
+                            <td><?= htmlspecialchars(AuthController::getUserRole($sub['id'])) ?></td>
                             <td><?= htmlspecialchars($sub['created_at']) ?></td>
                         </tr>
                     <?php endforeach; ?>

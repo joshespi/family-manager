@@ -10,4 +10,8 @@ class LoggerController
     {
         Logger::log($pdo, $userId, $actionType, $description);
     }
+    public static function getAll($pdo, $filterType = null)
+    {
+        return Logger::getAll($pdo, $filterType);
+    }
 }
