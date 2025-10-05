@@ -89,4 +89,9 @@ class AuthController
 
         return $result;
     }
+    public static function getParentID($user_id)
+    {
+        $user = User::findById($user_id);
+        return $user ? $user['parent_id'] : null;
+    }
 }
