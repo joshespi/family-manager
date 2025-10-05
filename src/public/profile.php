@@ -3,14 +3,11 @@ require_once __DIR__ . '/start.php';
 require_once __DIR__ . '/auth_check.php';
 
 use App\Controllers\AuthController;
-use App\Models\User;
-
-
 
 $subAccounts = [];
 // Fetch sub-accounts if user has permission
 if (in_array('parent_user', $userPermissions['permissions'])) {
-    $subAccounts = User::getSubAccounts($_SESSION['user_id']);
+    $subAccounts = AuthController::getSubAccounts($_SESSION['user_id']);
 }
 
 // Handle sub user creation

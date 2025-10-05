@@ -164,14 +164,16 @@ class User
         $stmt->execute([$userId]);
         return $stmt->fetchColumn();
     }
-    public static function getRole($pdo, $userId)
+    public static function getRole($userId)
     {
+        $pdo = \Database::getConnection();
         $stmt = $pdo->prepare("SELECT role FROM user_permissions WHERE user_id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchColumn() ?: 'child';
     }
-    public static function fetchAllWithPermissionsAndSettings($pdo)
+    public static function fetchAllWithPermissionsAndSettings()
     {
+        $pdo = \Database::getConnection();
         $stmt = $pdo->prepare(
             "SELECT 
                 u.id, 

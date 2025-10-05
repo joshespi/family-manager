@@ -1,7 +1,6 @@
 <?php
 
 use App\Controllers\AuthController;
-use App\Models\User;
 
 // Ensure user is logged in
 if (!AuthController::check()) {
@@ -10,6 +9,6 @@ if (!AuthController::check()) {
 }
 
 
-$userPermissions = User::getPermissions($_SESSION['user_id']);
+$userPermissions = AuthController::getUserPermissions($_SESSION['user_id']);
 $pdo = Database::getConnection();
-$user = User::findById($_SESSION['user_id']);
+$user = AuthController::getUserById($_SESSION['user_id']);

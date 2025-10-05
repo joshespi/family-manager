@@ -1,8 +1,10 @@
 <?php
+
+use App\Controllers\AuthController;
+
 require_once __DIR__ . '/start.php';
 require_once __DIR__ . '/auth_check.php';
 
-use App\Models\User;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['id'] ?? 0);
@@ -10,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $role = trim($_POST['role'] ?? '');
 
     if ($id && $username && $role) {
-        User::updateUser($id, $username, $role);
+        AuthController::updateUser($id, $username, $role);
         $_SESSION['system_message'] = "User updated successfully.";
     } else {
         $_SESSION['system_message'] = "Invalid input.";
