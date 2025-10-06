@@ -3,15 +3,26 @@
 namespace App\Controllers;
 
 use App\Models\Logger;
+use \PDO;
 
 class LoggerController
 {
-    public static function log($pdo, $userId, $actionType, $description)
+    // Create
+    public static function log($userId, $actionType, $description)
     {
+        $pdo = \Database::getConnection();
         Logger::log($pdo, $userId, $actionType, $description);
     }
-    public static function getAll($pdo, $filterType = null)
+
+
+    // Read
+    public static function getAll($filterType = null)
     {
+        $pdo = \Database::getConnection();
         return Logger::getAll($pdo, $filterType);
     }
+
+    // Update
+    // Delete
+
 }

@@ -8,6 +8,9 @@ class Logger
 {
     protected $pdo;
 
+
+
+    // Create
     public static function log($pdo, $userId, $actionType, $description)
     {
         $stmt = $pdo->prepare(
@@ -16,6 +19,9 @@ class Logger
         $stmt->execute([$userId, $actionType, $description]);
     }
 
+
+
+    // Read
     public static function getAll($pdo, $filterType = null)
     {
         if ($filterType) {

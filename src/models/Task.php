@@ -15,6 +15,19 @@ class Task
     public $created_at;
     public $updated_at;
 
+
+    // Create
+    public static function create($pdo, $name, $description, $reward_units, $due_date, $assigned_to, $family_id)
+    {
+        $stmt = $pdo->prepare(
+            "INSERT INTO tasks (name, description, reward_units, due_date, assigned_to, family_id) VALUES (?, ?, ?, ?, ?, ?)"
+        );
+        $result = $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $family_id]);
+        return $result ? $pdo->lastInsertId() : false;
+    }
+
+
+    // Read
     public static function getAll($pdo, $family_id)
     {
         $stmt = $pdo->prepare("SELECT * FROM tasks WHERE completed=false AND family_id = ?");
@@ -28,39 +41,14 @@ class Task
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    public static function create($pdo, $name, $description, $reward_units, $due_date, $assigned_to, $family_id)
-    {
-        $stmt = $pdo->prepare(
-            "INSERT INTO tasks (name, description, reward_units, due_date, assigned_to, family_id) VALUES (?, ?, ?, ?, ?, ?)"
-        );
-        $result = $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $family_id]);
-        return $result ? $pdo->lastInsertId() : false;
-    }
-    public static function markCompleted($pdo, $id)
-    {
-        $stmt = $pdo->prepare("UPDATE tasks SET completed = true WHERE id = ?");
-        return $stmt->execute([$id]);
-    }
-    public static function update($pdo, $id, $name, $description, $reward_units, $due_date, $assigned_to)
-    {
-        // Convert empty due_date to null
-        $due_date = empty($_POST['due_date']) ? null : $_POST['due_date'];
-        $stmt = $pdo->prepare(
-            "UPDATE tasks SET name = ?, description = ?, reward_units = ?, due_date = ?, assigned_to = ? WHERE id = ?"
-        );
-        return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $id]);
-    }
-    public function uncomplete($pdo, $taskId)
-    {
-        $stmt = $pdo->prepare("UPDATE tasks SET completed = 0 WHERE id = ?");
-        return $stmt->execute([$taskId]);
-    }
+
     public static function getOpenTasksAssignedToUser($pdo, $family_id, $user_id)
     {
         $stmt = $pdo->prepare("SELECT * FROM tasks WHERE family_id = ? AND assigned_to = ? AND completed = 0");
         $stmt->execute([$family_id, $user_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
     public static function getCompletedTasksAssignedToUser($pdo, $family_id, $user_id)
     {
         $stmt = $pdo->prepare(
@@ -72,10 +60,39 @@ class Task
         ]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
     public static function getCompletedTasksForFamily($pdo, $family_id)
     {
         $stmt = $pdo->prepare("SELECT * FROM tasks WHERE family_id = ? AND completed = 1");
         $stmt->execute([$family_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+
+    // Update
+    public static function update($pdo, $id, $name, $description, $reward_units, $due_date, $assigned_to)
+    {
+        // Convert empty due_date to null
+        $due_date = empty($_POST['due_date']) ? null : $_POST['due_date'];
+        $stmt = $pdo->prepare(
+            "UPDATE tasks SET name = ?, description = ?, reward_units = ?, due_date = ?, assigned_to = ? WHERE id = ?"
+        );
+        return $stmt->execute([$name, $description, $reward_units, $due_date, $assigned_to, $id]);
+    }
+
+    public static function markCompleted($pdo, $id)
+    {
+        $stmt = $pdo->prepare("UPDATE tasks SET completed = true WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+
+    public function uncomplete($pdo, $taskId)
+    {
+        $stmt = $pdo->prepare("UPDATE tasks SET completed = 0 WHERE id = ?");
+        return $stmt->execute([$taskId]);
+    }
+
+
+
+    // Delete
 }
