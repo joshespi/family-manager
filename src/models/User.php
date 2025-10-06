@@ -19,6 +19,10 @@ class User
         return ['success' => true];
     }
 
+
+
+
+
     // Create
     public static function create($username, $password, $role, $parentId = null)
     {
@@ -66,6 +70,8 @@ class User
     }
 
 
+
+
     // Read
     public static function findBy($field, $value)
     {
@@ -102,6 +108,30 @@ class User
             'role' => $role,
             'permissions' => $permissions
         ];
+    }
+
+    public static function readUserPermission($field, $userId)
+    {
+        $allowed = ['role'];
+        if (!in_array($field, $allowed)) {
+            throw new \InvalidArgumentException("Invalid field for user permissions lookup.");
+        }
+        $pdo = \Database::getConnection();
+        $stmt = $pdo->prepare("SELECT $field FROM user_permissions WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function readUserSetting($field, $userId)
+    {
+        $allowed = ['name', 'email'];
+        if (!in_array($field, $allowed)) {
+            throw new \InvalidArgumentException("Invalid field for user settings lookup.");
+        }
+        $pdo = \Database::getConnection();
+        $stmt = $pdo->prepare('SELECT * FROM user_settings WHERE user_id = ?');
+        $stmt->execute([$userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public static function getSubAccounts($userId)
@@ -168,22 +198,6 @@ class User
         return $stmt->fetchColumn() ?: 'Unknown';
     }
 
-    public static function getParentId($userId)
-    {
-        $pdo = \Database::getConnection();
-        $stmt = $pdo->prepare("SELECT parent_id FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        return $stmt->fetchColumn();
-    }
-
-    public static function getRole($userId)
-    {
-        $pdo = \Database::getConnection();
-        $stmt = $pdo->prepare("SELECT role FROM user_permissions WHERE user_id = ?");
-        $stmt->execute([$userId]);
-        return $stmt->fetchColumn() ?: 'child';
-    }
-
     public static function fetchAllWithPermissionsAndSettings()
     {
         $pdo = \Database::getConnection();
@@ -202,6 +216,9 @@ class User
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+
+
 
     // Update
     public static function updateUser($id, $username, $role)
@@ -227,6 +244,9 @@ class User
 
         return true;
     }
+
+
+
 
 
     // Delete

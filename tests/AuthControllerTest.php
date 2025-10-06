@@ -9,7 +9,7 @@ use App\Controllers\AuthController;
 class AuthControllerTest extends TestCase
 {
     protected $pdo;
-    
+
     protected function setUp(): void
     {
         $this->pdo = Database::getConnection();
@@ -156,7 +156,7 @@ class AuthControllerTest extends TestCase
         AuthController::updateUser($user['id'], 'editeduser', 'parent');
         $edited = AuthController::getUserById($user['id']);
         $this->assertEquals('editeduser', $edited['username']);
-        $this->assertEquals('parent', AuthController::getUserRole($user['id']));
+        $this->assertEquals('parent', AuthController::getUserRole($user['id'])['role']);
     }
 
     public function testDeleteUser()

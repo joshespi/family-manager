@@ -73,6 +73,7 @@ class AuthController
     }
 
 
+
     // Read
     public static function login($username, $password)
     {
@@ -85,10 +86,12 @@ class AuthController
         }
         return false;
     }
+
     public static function check()
     {
         return SessionManager::get('user_id') !== null;
     }
+
 
 
     // Update
@@ -147,12 +150,7 @@ class AuthController
 
 
     //TODO: remove this function and replace all calls with User::findBy
-    public static function getParentID($user_id)
-    {
 
-        $user = User::findBy('id', $user_id);
-        return $user ? $user['parent_id'] : null;
-    }
     public static function getUserByUsername($username)
     {
 
@@ -163,12 +161,20 @@ class AuthController
     {
         return User::findBy('id', $id);
     }
+    public static function getParentID($user_id)
+    {
 
+        $user = User::findBy('id', $user_id);
+        return $user ? $user['parent_id'] : null;
+    }
 
     public static function getUserRole($userId)
     {
-        return User::getRole($userId);
+        return User::readUserPermission('role', $userId);
     }
+
+
+
     public static function getUserPermissionsAndSettings()
     {
         return User::fetchAllWithPermissionsAndSettings();
