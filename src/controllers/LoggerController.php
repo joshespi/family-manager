@@ -22,12 +22,7 @@ class LoggerController
         return Logger::getAll($pdo, $filterType);
     }
 
-
     // Update
-
-
-
     // Delete
-
 
 }

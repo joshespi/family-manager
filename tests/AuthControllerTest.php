@@ -75,7 +75,7 @@ class AuthControllerTest extends TestCase
         $role = 'user';
 
         AuthController::register($username, $password, $role);
-        $user = AuthController::getUserByUsername($username);
+        $user = AuthController::findByUsername($username);
 
         // Password in DB should not match plain password
         $this->assertNotEquals($password, $user['password']);
@@ -119,7 +119,7 @@ class AuthControllerTest extends TestCase
         $parentResult = AuthController::register($parentUsername, $parentPassword, $parentRole);
         $this->assertTrue($parentResult['success']);
 
-        $parent = AuthController::getUserByUsername($parentUsername);
+        $parent = AuthController::findByUsername($parentUsername);
 
         // parent creates a child sub-account
         $subUsername = 'child_' . uniqid();
@@ -130,7 +130,7 @@ class AuthControllerTest extends TestCase
         $this->assertTrue($result['success']);
 
         // non-parent (no permission) cannot create sub-account
-        $child = AuthController::getUserByUsername($subUsername);
+        $child = AuthController::findByUsername($subUsername);
 
         $result = AuthController::createSubAccount($child['id'], 'subuser1', $subPassword, 'child');
         $this->assertIsArray($result);
@@ -150,7 +150,7 @@ class AuthControllerTest extends TestCase
         $password = 'EditPass123';
         $role = 'user';
         AuthController::register($username, $password, $role);
-        $user = AuthController::getUserByUsername($username);
+        $user = AuthController::findByUsername($username);
 
         // Edit user
         AuthController::updateUser($user['id'], 'editeduser', 'parent');
@@ -166,7 +166,7 @@ class AuthControllerTest extends TestCase
         $password = 'DeletePass123';
         $role = 'user';
         AuthController::register($username, $password, $role);
-        $user = AuthController::getUserByUsername($username);
+        $user = AuthController::findByUsername($username);
         $this->assertNotFalse($user);
         // Delete user
         $result = AuthController::deleteUser($user['id']);

@@ -7,10 +7,6 @@ use App\Controllers\LoggerController;
 
 class TaskController
 {
-    // Create
-    // Read
-    // Update
-    // Delete
     private $pdo;
 
     public function __construct($pdo)
@@ -18,15 +14,10 @@ class TaskController
         $this->pdo = $pdo;
     }
 
-    public function getAllTasks($family_id)
-    {
-        return Task::getAll($this->pdo, $family_id);
-    }
 
-    public function getTask($id)
-    {
-        return Task::getById($this->pdo, $id);
-    }
+
+
+    // Create
     public function createTask($data)
     {
         $due_date = !empty($data['due_date']) ? $data['due_date'] : null;
@@ -55,6 +46,39 @@ class TaskController
 
         return $result;
     }
+
+
+
+
+    // Read
+    public function getAllTasks($family_id)
+    {
+        return Task::getAll($this->pdo, $family_id);
+    }
+
+    public function getTask($id)
+    {
+        return Task::getById($this->pdo, $id);
+    }
+    public function getOpenTasksAssignedToUser($family_id, $user_id)
+    {
+        return Task::getOpenTasksAssignedToUser($this->pdo, $family_id, $user_id);
+    }
+
+    public function getCompletedTasksAssignedToUser($family_id, $user_id)
+    {
+        return Task::getCompletedTasksAssignedToUser($this->pdo, $family_id, $user_id);
+    }
+
+    public function getCompletedTasksForFamily($family_id)
+    {
+        return Task::getCompletedTasksForFamily($this->pdo, $family_id);
+    }
+
+
+
+
+    // Update
     public function completeTask($id)
     {
         $result = Task::markCompleted($this->pdo, $id);
@@ -72,6 +96,7 @@ class TaskController
 
         return $result;
     }
+
     public function updateTask($data)
     {
         $assigned_to = !empty($data['assigned_to']) ? (int)$data['assigned_to'] : null;
@@ -112,16 +137,9 @@ class TaskController
         );
         return true;
     }
-    public function getOpenTasksAssignedToUser($family_id, $user_id)
-    {
-        return Task::getOpenTasksAssignedToUser($this->pdo, $family_id, $user_id);
-    }
-    public function getCompletedTasksAssignedToUser($family_id, $user_id)
-    {
-        return Task::getCompletedTasksAssignedToUser($this->pdo, $family_id, $user_id);
-    }
-    public function getCompletedTasksForFamily($family_id)
-    {
-        return Task::getCompletedTasksForFamily($this->pdo, $family_id);
-    }
+
+
+
+    // Delete
+
 }

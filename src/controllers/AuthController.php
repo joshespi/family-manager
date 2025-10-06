@@ -24,7 +24,7 @@ class AuthController
         if (!$validation['success']) {
             return $validation;
         }
-        if (self::getUserByUsername($username)) {
+        if (self::findByUsername($username)) {
             return ['success' => false, 'message' => 'Username already exists.'];
         }
 
@@ -78,7 +78,7 @@ class AuthController
     public static function login($username, $password)
     {
 
-        $user = self::getUserByUsername($username);
+        $user = self::findByUsername($username);
         if ($user && password_verify($password, $user['password'])) {
             SessionManager::regenerate();
             SessionManager::set('user_id', $user['id']);
@@ -90,6 +90,50 @@ class AuthController
     public static function check()
     {
         return SessionManager::get('user_id') !== null;
+    }
+
+    public static function findByUsername($username)
+    {
+        return User::findBy('username', $username);
+    }
+
+    public static function getUserById($id)
+    {
+        return User::findBy('id', $id);
+    }
+
+    public static function getParentID($user_id)
+    {
+
+        $user = User::findBy('id', $user_id);
+        return $user ? $user['parent_id'] : null;
+    }
+
+    public static function getUserRole($userId)
+    {
+        $role = User::readUserPermission('role', $userId);
+        return $role['role'] ?? null;
+    }
+    public static function getUserPermissionsAndSettings()
+    {
+        return User::fetchAllWithPermissionsAndSettings();
+    }
+    public static function getUserPermissions($userId)
+    {
+        return User::getPermissions($userId);
+    }
+    public static function getSubAccounts($parentId)
+    {
+        return User::getSubAccounts($parentId);
+    }
+    public static function getUsernameName($userId)
+    {
+        $user = User::findBy('id', $userId);
+        return $user ? $user['username'] : 'Unknown';
+    }
+    public static function getAllFamily($userId)
+    {
+        return User::getAllFamily($userId);
     }
 
 
@@ -140,61 +184,5 @@ class AuthController
             LoggerController::log(null, 'DELETE_USER', "User deleted: ID $user_id");
         }
         return $result;
-    }
-
-
-
-
-
-
-
-
-    //TODO: remove this function and replace all calls with User::findBy
-
-    public static function getUserByUsername($username)
-    {
-
-        return User::findBy('username', $username);
-    }
-
-    public static function getUserById($id)
-    {
-        return User::findBy('id', $id);
-    }
-    public static function getParentID($user_id)
-    {
-
-        $user = User::findBy('id', $user_id);
-        return $user ? $user['parent_id'] : null;
-    }
-
-    public static function getUserRole($userId)
-    {
-        $role = User::readUserPermission('role', $userId);
-        return $role['role'] ?? null;
-    }
-
-
-
-    public static function getUserPermissionsAndSettings()
-    {
-        return User::fetchAllWithPermissionsAndSettings();
-    }
-    public static function getUserPermissions($userId)
-    {
-        return User::getPermissions($userId);
-    }
-    public static function getSubAccounts($parentId)
-    {
-        return User::getSubAccounts($parentId);
-    }
-    public static function getUsernameName($userId)
-    {
-        $user = User::findBy('id', $userId);
-        return $user ? $user['username'] : 'Unknown';
-    }
-    public static function getAllFamily($userId)
-    {
-        return User::getAllFamily($userId);
     }
 }

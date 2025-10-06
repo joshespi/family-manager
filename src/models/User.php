@@ -22,7 +22,6 @@ class User
 
 
 
-
     // Create
     public static function create($username, $password, $role, $parentId = null)
     {
@@ -68,6 +67,7 @@ class User
         }
         return ['success' => false, 'message' => 'Failed to create user.'];
     }
+
 
 
 
@@ -244,8 +244,6 @@ class User
 
         return true;
     }
-
-
 
 
 
