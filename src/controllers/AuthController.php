@@ -62,7 +62,7 @@ class AuthController
     }
     public static function createSubAccount($creatorId, $username, $password, $role)
     {
-        $creator = User::findById($creatorId);
+        $creator = User::findBy('id', $creatorId);
         $creatorPerms = User::getPermissions($creatorId);
         if (!$creator || !in_array('parent_user', $creatorPerms['permissions'])) {
             return ['success' => false, 'message' => 'Only parents can create sub-accounts.'];
@@ -90,22 +90,24 @@ class AuthController
 
         return $result;
     }
+
     public static function getParentID($user_id)
     {
-        $user = User::findById($user_id);
+        $user = User::findBy('id', $user_id);
         return $user ? $user['parent_id'] : null;
     }
     public static function getUserByUsername($username)
     {
-        return User::findByUsername($username);
+        return User::findBy('username', $username);
     }
+
     public static function getUserById($id)
     {
-        return User::findById($id);
+        return User::findBy('id', $id);
     }
     public static function deleteUser($user_id)
     {
-        $user = User::findById($user_id);
+        $user = User::findBy('id', $user_id);
         if (!$user) {
             return false;
         }
@@ -120,7 +122,7 @@ class AuthController
     }
     public static function updateUser($user_id, $newUsername, $newRole)
     {
-        $user = User::findById($user_id);
+        $user = User::findBy('id', $user_id);
         if (!$user) {
             return ['success' => false, 'message' => 'User not found.'];
         }
@@ -128,7 +130,7 @@ class AuthController
         if (!in_array($newRole, $allowedRoles)) {
             return ['success' => false, 'message' => 'Invalid role specified.'];
         }
-        if ($newUsername !== $user['username'] && User::findByUsername($newUsername)) {
+        if ($newUsername !== $user['username'] && User::findBy('username', $newUsername)) {
             return ['success' => false, 'message' => 'Username already exists.'];
         }
 
@@ -159,7 +161,7 @@ class AuthController
     }
     public static function getUsernameName($userId)
     {
-        $user = User::findById($userId);
+        $user = User::findBy('id', $userId);
         return $user ? $user['username'] : 'Unknown';
     }
     public static function getAllFamily($userId)

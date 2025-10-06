@@ -7,6 +7,7 @@ use App\Models\Logger;
 
 class User
 {
+    // Helpers
     public static function validateCredentials($username, $password)
     {
         if (!preg_match('/^[a-zA-Z0-9_]{5,50}$/', $username)) {
@@ -66,19 +67,15 @@ class User
 
 
     // Read
-    public static function findByUsername($username)
+    public static function findBy($field, $value)
     {
+        $allowed = ['id', 'username'];
+        if (!in_array($field, $allowed)) {
+            throw new \InvalidArgumentException("Invalid field for user lookup.");
+        }
         $pdo = \Database::getConnection();
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE username = ?');
-        $stmt->execute([$username]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public static function findById($id)
-    {
-        $pdo = \Database::getConnection();
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
-        $stmt->execute([$id]);
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE $field = ?");
+        $stmt->execute([$value]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
@@ -132,7 +129,7 @@ class User
     {
         $pdo = \Database::getConnection();
         // Get current user's info
-        $user = self::findById($userId);
+        $user = self::findBy('id', $userId);
         if (!$user) return [];
 
         $parentId = $user['parent_id'];
@@ -143,7 +140,7 @@ class User
         $family = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         // Also include the parent user
-        $parent = self::findById($parentId);
+        $parent = self::findBy('id', $parentId);
         if ($parent) {
             array_unshift($family, $parent);
         }
