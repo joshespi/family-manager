@@ -9,20 +9,18 @@ use App\Controllers\AuthController;
 class AuthControllerTest extends TestCase
 {
     protected $pdo;
-
+    
     protected function setUp(): void
     {
-        global $pdo;
-        $_SESSION = [];
-        $pdo = Database::getConnection();
-        $this->pdo = $pdo;
-        // Clear tables to avoid FK constraint issues
-        $this->pdo->exec("DELETE FROM tasks");
-        $this->pdo->exec("DELETE FROM users");
-        $this->pdo->exec("DELETE FROM user_permissions");
-        $this->pdo->exec("DELETE FROM user_settings");
-        $this->pdo->exec("DELETE FROM change_log");
+        $this->pdo = Database::getConnection();
+        $this->pdo->beginTransaction();
     }
+
+    protected function tearDown(): void
+    {
+        $this->pdo->rollBack();
+    }
+
     public function testCheckWithoutLogin()
     {
         $this->assertFalse(AuthController::check());
