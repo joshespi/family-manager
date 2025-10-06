@@ -42,6 +42,10 @@ class AuthController
         return ['success' => false, 'message' => 'Registration failed.'];
     }
 
+
+
+
+
     public static function createSubAccount($creatorId, $username, $password, $role)
     {
         $creator = User::findBy('id', $creatorId);
@@ -71,6 +75,7 @@ class AuthController
 
         return $result;
     }
+
 
 
 
@@ -114,27 +119,33 @@ class AuthController
         $role = User::readUserPermission('role', $userId);
         return $role['role'] ?? null;
     }
+
     public static function getUserPermissionsAndSettings()
     {
         return User::fetchAllWithPermissionsAndSettings();
     }
+
     public static function getUserPermissions($userId)
     {
         return User::getPermissions($userId);
     }
+
     public static function getSubAccounts($parentId)
     {
         return User::getSubAccounts($parentId);
     }
+
     public static function getUsernameName($userId)
     {
         $user = User::findBy('id', $userId);
         return $user ? $user['username'] : 'Unknown';
     }
+
     public static function getAllFamily($userId)
     {
         return User::getAllFamily($userId);
     }
+
 
 
 
@@ -162,6 +173,8 @@ class AuthController
         }
         return ['success' => false, 'message' => 'Update failed.'];
     }
+
+
 
 
     // Delete
