@@ -7,6 +7,10 @@ use App\Controllers\LoggerController;
 
 class TaskController
 {
+    // Create
+    // Read
+    // Update
+    // Delete
     private $pdo;
 
     public function __construct($pdo)
@@ -43,7 +47,6 @@ class TaskController
         if ($result) {
             $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
             LoggerController::log(
-                $this->pdo,
                 $userId,
                 'CREATE_TASK',
                 "Task '{$data['name']}' created by user ID $userId"
@@ -61,7 +64,6 @@ class TaskController
             // Get current user ID from session or context
             $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
             LoggerController::log(
-                $this->pdo,
                 $userId,
                 'COMPLETE_TASK',
                 "Task ID $id marked as completed by user ID $userId"
@@ -87,7 +89,6 @@ class TaskController
         if ($result) {
             $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
             LoggerController::log(
-                $this->pdo,
                 $userId,
                 'UPDATE_TASK',
                 "Task ID {$data['task_id']} updated by user ID $userId"
@@ -105,7 +106,6 @@ class TaskController
         $_SESSION['system_message'] = "Task marked as incomplete.";
         $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
         LoggerController::log(
-            $this->pdo,
             $userId,
             'UNCOMPLETE_TASK',
             "Task ID $taskId marked as incomplete by user ID $userId"

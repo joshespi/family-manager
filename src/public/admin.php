@@ -9,7 +9,7 @@ use App\Controllers\LoggerController;
 $allUsers = AuthController::getUserPermissionsAndSettings();
 
 $filterType = $_GET['type'] ?? null;
-$logs = LoggerController::getAll($pdo, $filterType);
+$logs = LoggerController::getAll($filterType);
 
 // render the Admin view
 render('admin', [
