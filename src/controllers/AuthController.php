@@ -157,4 +157,9 @@ class AuthController
     {
         return User::getSubAccounts($parentId);
     }
+    public static function getUsernameName($userId)
+    {
+        $user = User::findById($userId);
+        return $user ? $user['username'] : 'Unknown';
+    }
 }

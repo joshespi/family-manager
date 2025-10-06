@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Controllers\AuthController;
 ?>
 
 <div class="row g-3">
@@ -17,7 +17,9 @@ use App\Models\User;
                         <?php if (!empty($task['due_date'])): ?>
                             <li><strong>Due Date:</strong> <?= htmlspecialchars($task['due_date']) ?></li>
                         <?php endif; ?>
-                        <li><strong>Assigned To:</strong> <?= htmlspecialchars(User::getDisplayName($pdo, $task['assigned_to'])) ?></li>
+                        <?php if (!empty($task['assigned_to'])): ?>
+                            <li><strong>Assigned To:</strong> <?= htmlspecialchars(AuthController::getUsernameName($pdo, $task['assigned_to'])) ?></li>
+                        <?php endif; ?>
                     </ul>
                     <div class="mt-auto d-flex align-items-center">
                         <?php if (empty($task['completed'])): ?>
