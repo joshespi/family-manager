@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\Task;
-use App\Controllers\Logger;
+use App\Controllers\LoggerController;
 
 class TaskController
 {
