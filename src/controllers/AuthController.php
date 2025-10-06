@@ -10,7 +10,7 @@ class AuthController
     public static function login($username, $password)
     {
 
-        $user = AuthController::getUserByUsername($username);
+        $user = self::getUserByUsername($username);
         if ($user && password_verify($password, $user['password'])) {
             SessionManager::regenerate();
             SessionManager::set('user_id', $user['id']);
@@ -45,7 +45,7 @@ class AuthController
         if (!$validation['success']) {
             return $validation;
         }
-        if (AuthController::getUserByUsername($username)) {
+        if (self::getUserByUsername($username)) {
             return ['success' => false, 'message' => 'Username already exists.'];
         }
 
@@ -161,5 +161,9 @@ class AuthController
     {
         $user = User::findById($userId);
         return $user ? $user['username'] : 'Unknown';
+    }
+    public static function getAllFamily($userId)
+    {
+        return User::getAllFamily($userId);
     }
 }

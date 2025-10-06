@@ -1,11 +1,11 @@
 <?php
 
 use App\Controllers\TaskController;
-use App\Models\User;
+use App\Controllers\AuthController;
 
 // Fetch users (family members) from the database
-$users = User::getAllFamily($pdo, $_SESSION['user_id']);
-$parent_id = User::getParentId($pdo, $_SESSION['user_id']);
+$users = AuthController::getAllFamily($_SESSION['user_id']);
+$family_id = AuthController::getParentID($_SESSION['user_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task_id'])) {
     $taskController = new TaskController($pdo);
@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'reward_units' => $reward_units,
         'due_date' => $_POST['due_date'],
         'assigned_to' => $assigned_to,
-        'family_id' => $parent_id
+        'family_id' => $family_id
     ]);
     $_SESSION['system_message'] = $success ? "Task created!" : "Error creating task.";
     header("Location: " . $_SERVER['REQUEST_URI']);

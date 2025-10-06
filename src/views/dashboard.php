@@ -1,12 +1,11 @@
 <?php
 
+use App\Controllers\AuthController;
 use App\Controllers\TaskController;
-use App\Models\User;
 
 $pdo = Database::getConnection();
-$family_id = User::getParentId($pdo, $_SESSION['user_id']);
+$family_id = AuthController::getParentID($_SESSION['user_id']);
 $taskController = new TaskController($pdo);
-
 
 ?>
 

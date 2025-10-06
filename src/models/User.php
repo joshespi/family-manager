@@ -119,8 +119,9 @@ class User
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
     }
-    public static function getAllFamily($pdo, $userId)
+    public static function getAllFamily($userId)
     {
+        $pdo = \Database::getConnection();
         // Get current user's info
         $user = self::findById($userId);
         if (!$user) return [];
@@ -145,8 +146,9 @@ class User
         }
         return array_values($unique);
     }
-    public static function getDisplayName($pdo, $userId)
+    public static function getDisplayName($userId)
     {
+        $pdo = \Database::getConnection();
         // Try user_settings first, fallback to users table
         $stmt = $pdo->prepare("SELECT name FROM user_settings WHERE user_id = ?");
         $stmt->execute([$userId]);
@@ -158,8 +160,9 @@ class User
         $stmt->execute([$userId]);
         return $stmt->fetchColumn() ?: 'Unknown';
     }
-    public static function getParentId($pdo, $userId)
+    public static function getParentId($userId)
     {
+        $pdo = \Database::getConnection();
         $stmt = $pdo->prepare("SELECT parent_id FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchColumn();

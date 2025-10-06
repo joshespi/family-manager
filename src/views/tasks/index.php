@@ -1,10 +1,10 @@
 <?php
 
 use App\Controllers\TaskController;
-use App\Models\User;
+use App\Controllers\AuthController;
 
 $pdo = Database::getConnection();
-$family_id = User::getParentId($pdo, $_SESSION['user_id']);
+$family_id = AuthController::getParentID($_SESSION['user_id']);
 $taskController = new TaskController($pdo);
 $completedTasksUser = $taskController->getCompletedTasksAssignedToUser($family_id, $_SESSION['user_id']);
 $completedTasks = $taskController->getCompletedTasksForFamily($family_id);
