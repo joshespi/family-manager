@@ -156,7 +156,7 @@ class AuthControllerTest extends TestCase
         AuthController::updateUser($user['id'], 'editeduser', 'parent');
         $edited = AuthController::getUserById($user['id']);
         $this->assertEquals('editeduser', $edited['username']);
-        $this->assertEquals('parent', AuthController::getUserRole($user['id'])['role']);
+        $this->assertEquals('parent', AuthController::getUserRole($user['id']));
     }
 
     public function testDeleteUser()

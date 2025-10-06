@@ -170,7 +170,8 @@ class AuthController
 
     public static function getUserRole($userId)
     {
-        return User::readUserPermission('role', $userId);
+        $role = User::readUserPermission('role', $userId);
+        return $role['role'] ?? null;
     }
 
 
