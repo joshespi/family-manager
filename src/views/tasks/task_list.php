@@ -18,7 +18,7 @@ use App\Controllers\AuthController;
                             <li><strong>Due Date:</strong> <?= htmlspecialchars($task['due_date']) ?></li>
                         <?php endif; ?>
                         <?php if (!empty($task['assigned_to'])): ?>
-                            <li><strong>Assigned To:</strong> <?= htmlspecialchars(AuthController::getUsernameName($pdo, $task['assigned_to'])) ?></li>
+                            <li><strong>Assigned To:</strong> <?= htmlspecialchars(AuthController::getUsernameName($task['assigned_to'])) ?></li>
                         <?php endif; ?>
                     </ul>
                     <div class="mt-auto d-flex align-items-center">
