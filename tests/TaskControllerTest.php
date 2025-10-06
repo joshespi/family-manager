@@ -29,10 +29,11 @@ class TaskControllerTest extends TestCase
 
     public function testCreateTaskAndGetTask()
     {
-        $this->user->register('testuser1', 'testpass1', 'user');
-        $stmt = $this->pdo->prepare("SELECT id FROM users WHERE username = ?");
-        $stmt->execute(['testuser1']);
-        $userId = $stmt->fetchColumn();
+        $result = $this->user->register('testuser16435', 'testpass1', 'user');
+        $this->assertTrue($result['success'], $result['message'] ?? 'Registration failed');
+        $userId = $result['user_id'];
+        $family_id = $this->user->getParentID($userId);
+        $this->assertNotEmpty($family_id, 'Family ID should not be empty');
 
         $data = [
             'name' => 'Controller Task',
@@ -55,35 +56,35 @@ class TaskControllerTest extends TestCase
         $this->assertEquals($userId, $task['assigned_to']);
     }
 
-    // public function testGetAllTasks()
-    // {
-    //     $result = $this->user->register('testuser123', 'testpass1', 'user');
-    //     $this->assertTrue($result['success'], $result['message'] ?? 'Registration failed');
-    //     $userId = $result['user_id'];
-    //     $familyId = $this->user->getFamilyId($userId);
-    //     $this->assertNotEmpty($familyId, 'Family ID should not be empty');
-    //     $this->controller->createTask([
-    //         'name' => 'Task 1',
-    //         'description' => 'Desc 1',
-    //         'reward_units' => 1,
-    //         'due_date' => null,
-    //         'assigned_to' => $userId,
-    //         'family_id' => $familyId
-    //     ]);
-    //     $this->controller->createTask([
-    //         'name' => 'Task 2',
-    //         'description' => 'Desc 2',
-    //         'reward_units' => 2,
-    //         'due_date' => null,
-    //         'assigned_to' => $userId,
-    //         'family_id' => $familyId
-    //     ]);
+    public function testGetAllTasks()
+    {
+        $result = $this->user->register('testuser123', 'testpass1', 'user');
+        $this->assertTrue($result['success'], $result['message'] ?? 'Registration failed');
+        $userId = $result['user_id'];
+        $family_id = $this->user->getParentID($userId);
+        $this->assertNotEmpty($family_id, 'Family ID should not be empty');
+        $this->controller->createTask([
+            'name' => 'Task 1',
+            'description' => 'Desc 1',
+            'reward_units' => 1,
+            'due_date' => null,
+            'assigned_to' => $userId,
+            'family_id' => $family_id
+        ]);
+        $this->controller->createTask([
+            'name' => 'Task 2',
+            'description' => 'Desc 2',
+            'reward_units' => 2,
+            'due_date' => null,
+            'assigned_to' => $userId,
+            'family_id' => $family_id
+        ]);
 
-    //     $tasks = $this->controller->getAllTasks($familyId);
-    //     $this->assertCount(2, $tasks);
-    //     $this->assertEquals('Task 1', $tasks[0]['name']);
-    //     $this->assertEquals('Task 2', $tasks[1]['name']);
-    // }
+        $tasks = $this->controller->getAllTasks($family_id);
+        $this->assertCount(2, $tasks);
+        $this->assertEquals('Task 1', $tasks[0]['name']);
+        $this->assertEquals('Task 2', $tasks[1]['name']);
+    }
 
     // public function testGetTasksAssignedToUser()
     // {
