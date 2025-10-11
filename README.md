@@ -1,5 +1,15 @@
 # Family Manager
 
+## Prerequisites
+
+Make sure you have [Composer](https://getcomposer.org/) installed.
+
+After cloning the repository, install PHP dependencies by running:
+
+```bash
+composer install
+```
+
 ## Environment Configuration
 
 Create a `.env` file with the following variables:
@@ -15,9 +25,8 @@ DB_PASS=admin
 DEV_MODE=true
 ```
 
-**Important:**  
-After seeding, the default admin username and password are both `admin`.  
-Be sure to log in and update your admin password immediately for security.
+> **Warning:**  
+> Do **not** use these credentials in production environments. Update all sensitive values before deploying.
 
 ## Getting Started
 
@@ -35,10 +44,15 @@ Enter the web container and run:
 php config/migrate.php
 ```
 
+**Important:**  
+After seeding, the default admin username and password are both `admin`.  
+Be sure to log in and update your admin password immediately for security.
+
 seed database with a few users
 
 ```bash
 php config/seeder.php
+```
 
 ## Run Tests (PHPPest)
 
@@ -50,9 +64,9 @@ from project directory.
 
 ### Access the Application
 
-Open your browser and navigate to `http://localhost:8080` to use the php boilerplate.
+Open your browser and navigate to `http://localhost:8040` to use the php boilerplate.
 
-Access phpmyadmin in your browser at `http://localhost:8081`
+Access phpmyadmin in your browser at `http://localhost:8045`
 
 ## Contributing
 

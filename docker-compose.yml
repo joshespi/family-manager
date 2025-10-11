@@ -9,6 +9,7 @@ services:
       - "8040:80"
     volumes:
       - ./src:/var/www/html
+      - ./vendor:/var/www/html/vendor
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
