@@ -12,12 +12,13 @@ use App\Controllers\TaskController;
 $pdo->exec("DELETE FROM tasks");
 $pdo->exec("DELETE FROM user_permissions");
 $pdo->exec("DELETE FROM user_settings");
+$pdo->exec("DELETE FROM change_log");
 $pdo->exec("DELETE FROM users");
 
 // Insert main parent user
-$parentPassword = password_hash('admin', PASSWORD_DEFAULT);
+$parentPassword = password_hash('adminuser1', PASSWORD_DEFAULT);
 $pdo->prepare("INSERT INTO users (username, password) VALUES (?, ?)")
-    ->execute(['admin', $parentPassword]);
+    ->execute(['adminuser1', $parentPassword]);
 $parentId = $pdo->lastInsertId();
 
 // update parent_id of initial admin user to self
@@ -33,11 +34,11 @@ $pdo->prepare("INSERT INTO user_settings (user_id, name) VALUES (?, ?)")
     ->execute([$parentId, 'Admin User']);
 
 // Log in as admin to set session for controller actions
-AuthController::login('admin', 'admin');
+AuthController::login('adminuser1', 'adminuser1');
 
 // Create sub parent user
 $subParent = AuthController::createSubAccount(
-    AuthController::findByUsername('admin')['id'],
+    AuthController::findByUsername('adminuser1')['id'],
     'parentuser1',
     'parentuser1',
     'parent'
@@ -45,20 +46,20 @@ $subParent = AuthController::createSubAccount(
 
 // Create child users
 $child1 = AuthController::createSubAccount(
-    AuthController::findByUsername('admin')['id'],
+    AuthController::findByUsername('adminuser1')['id'],
     'childuser1',
     'childuser1',
     'child'
 );
 $child2 = AuthController::createSubAccount(
-    AuthController::findByUsername('admin')['id'],
+    AuthController::findByUsername('adminuser1')['id'],
     'childuser2',
     'childuser2',
     'child'
 );
 
 // Add tasks
-$parentId = AuthController::findByUsername('admin')['id'];
+$parentId = AuthController::findByUsername('adminuser1')['id'];
 $subParentId = AuthController::findByUsername('parentuser1')['id'];
 $childId1 = AuthController::findByUsername('childuser1')['id'];
 $childId2 = AuthController::findByUsername('childuser2')['id'];

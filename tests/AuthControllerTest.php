@@ -327,10 +327,10 @@ class AuthControllerTest extends TestCase
     {
         // Make sure the seed has run and only one admin exists
         // Log in as the seeded admin
-        AuthController::login('admin', 'admin');
+        AuthController::login('adminuser1', 'adminuser1');
 
         // Find the admin's user ID
-        $admin = AuthController::findByUsername('admin');
+        $admin = AuthController::findByUsername('adminuser1');
         $adminId = $admin['id'];
 
         // Try to delete the last admin
