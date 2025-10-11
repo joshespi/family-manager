@@ -18,7 +18,34 @@ class User
         }
         return ['success' => true];
     }
+    public static function canManageUser($actingUserId, $targetUserId)
+    {
+        if (!$actingUserId || !$targetUserId) return false;
 
+        $actingPerms = self::getPermissions($actingUserId);
+        $actingRole = $actingPerms['role'];
+
+        // Admin can manage anyone
+        if ($actingRole === 'admin') return true;
+
+        // Parent/user can manage self or family members (same parent_id)
+        if (in_array($actingRole, ['parent', 'user'])) {
+            $actingUser = self::findBy('id', $actingUserId);
+            $targetUser = self::findBy('id', $targetUserId);
+            if (!$actingUser || !$targetUser) return false;
+
+            // Self or same family
+            if (
+                $actingUserId == $targetUserId ||
+                $actingUser['parent_id'] == $targetUser['parent_id']
+            ) {
+                return true;
+            }
+        }
+
+        // Otherwise, not allowed
+        return false;
+    }
 
 
 
@@ -223,6 +250,12 @@ class User
     // Update
     public static function updateUser($id, $username, $role)
     {
+        //// Check permissions
+        // Check if current user can manage the target user
+        $actingUserId = $_SESSION['user_id'] ?? null;
+        if (!self::canManageUser($actingUserId, $id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
         $pdo = \Database::getConnection();
 
         // Update username
@@ -250,6 +283,10 @@ class User
     // Delete
     public static function deleteUser($id)
     {
+        $actingUserId = $_SESSION['user_id'] ?? null;
+        if (!self::canManageUser($actingUserId, $id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
         $pdo = \Database::getConnection();
 
         // Delete tasks assigned to this user

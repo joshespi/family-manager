@@ -7,6 +7,15 @@ use App\Controllers\LoggerController;
 
 class AuthController
 {
+    //helpers
+    public static function canCurrentUserManage($targetUserId)
+    {
+        $actingUserId = SessionManager::get('user_id');
+        if (!$actingUserId) return false;
+        return \App\Models\User::canManageUser($actingUserId, $targetUserId);
+    }
+
+
     // Create
     public static function register($username, $password, $role)
     {
@@ -152,6 +161,11 @@ class AuthController
     // Update
     public static function updateUser($user_id, $newUsername, $newRole)
     {
+        // Check if current user can manage the target user
+        if (!self::canCurrentUserManage($user_id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
+
         $user = User::findBy('id', $user_id);
         if (!$user) {
             return ['success' => false, 'message' => 'User not found.'];
@@ -185,6 +199,9 @@ class AuthController
 
     public static function deleteUser($user_id)
     {
+        if (!self::canCurrentUserManage($user_id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
         $user = User::findBy('id', $user_id);
         if (!$user) {
             return false;
