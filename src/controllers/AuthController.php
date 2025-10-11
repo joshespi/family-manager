@@ -166,13 +166,24 @@ class AuthController
             return ['success' => false, 'message' => 'Permission denied.'];
         }
 
+        // data validation
+        if (empty($newUsername)) {
+            return ['success' => false, 'message' => 'Username cannot be empty.'];
+        }
+
         $user = User::findBy('id', $user_id);
         if (!$user) {
             return ['success' => false, 'message' => 'User not found.'];
         }
         $allowedRoles = ['user', 'admin', 'parent', 'child'];
+
+        // permission checks
         if (!in_array($newRole, $allowedRoles)) {
             return ['success' => false, 'message' => 'Invalid role specified.'];
+        }
+        $currentUserRole = self::getUserRole(SessionManager::get('user_id'));
+        if ($newRole === 'admin' && $currentUserRole !== 'admin') {
+            return ['success' => false, 'message' => 'Only admins can assign the admin role.'];
         }
         if ($newUsername !== $user['username'] && User::findBy('username', $newUsername)) {
             return ['success' => false, 'message' => 'Username already exists.'];

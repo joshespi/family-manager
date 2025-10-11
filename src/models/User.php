@@ -256,6 +256,12 @@ class User
         if (!self::canManageUser($actingUserId, $id)) {
             return ['success' => false, 'message' => 'Permission denied.'];
         }
+
+        // Prevent non-admins from assigning the admin role
+        $actingPerms = self::getPermissions($actingUserId);
+        if ($role === 'admin' && $actingPerms['role'] !== 'admin') {
+            return ['success' => false, 'message' => 'Only admins can assign the admin role.'];
+        }
         $pdo = \Database::getConnection();
 
         // Update username
