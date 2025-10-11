@@ -60,9 +60,13 @@ class SessionManagerTest extends TestCase
     }
     public function testCsrfTokenIsUnique()
     {
-        unset($_SESSION['csrf_token']);
+        if (isset($_SESSION) && is_array($_SESSION)) {
+            unset($_SESSION['csrf_token']);
+        }
         $token1 = SessionManager::generateCsrfToken();
-        unset($_SESSION['csrf_token']);
+        if (isset($_SESSION) && is_array($_SESSION)) {
+            unset($_SESSION['csrf_token']);
+        }
         $token2 = SessionManager::generateCsrfToken();
         $this->assertNotEquals($token1, $token2, "Each CSRF token should be unique.");
     }
