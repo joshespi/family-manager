@@ -295,6 +295,15 @@ class User
         }
         $pdo = \Database::getConnection();
 
+        // Log the deletion
+        $actingUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        Logger::log(
+            $pdo,
+            $actingUserId,
+            'DELETE_USER',
+            "User ID $id deleted"
+        );
+
         // Delete tasks assigned to this user
         $pdo->prepare("DELETE FROM tasks WHERE assigned_to = ?")->execute([$id]);
 
@@ -305,15 +314,6 @@ class User
         // Then delete the user
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         $result = $stmt->execute([$id]);
-
-        // Log the deletion
-        $actingUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-        Logger::log(
-            $pdo,
-            $actingUserId,
-            'DELETE_USER',
-            "User ID $id deleted"
-        );
 
         return $result;
     }
