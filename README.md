@@ -60,6 +60,18 @@ from project directory.
 ./vendor/bin/pest
 ```
 
+## Static Analysis (PHPStan)
+
+This project uses [PHPStan](https://phpstan.org/) for static code analysis.
+
+To run PHPStan:
+
+```bash
+vendor/bin/phpstan analyse src tests
+```
+
+You can configure analysis settings in the `phpstan.neon` file at the project root.
+
 ### Access the Application
 
 Open your browser and navigate to `http://localhost:8040` to use the php boilerplate.
