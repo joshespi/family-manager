@@ -152,6 +152,9 @@ class AuthControllerTest extends TestCase
         AuthController::register($username, $password, $role);
         $user = AuthController::findByUsername($username);
 
+        // Log in as the user to set $_SESSION['user_id']
+        AuthController::login($username, $password);
+
         // Edit user
         AuthController::updateUser($user['id'], 'editeduser', 'parent');
         $edited = AuthController::getUserById($user['id']);
@@ -166,12 +169,139 @@ class AuthControllerTest extends TestCase
         $password = 'DeletePass123';
         $role = 'user';
         AuthController::register($username, $password, $role);
+
+
+        // Log in as the user to set $_SESSION['user_id']
+        AuthController::login($username, $password);
+
         $user = AuthController::findByUsername($username);
         $this->assertNotFalse($user);
+
+
+
         // Delete user
         $result = AuthController::deleteUser($user['id']);
         $this->assertTrue($result);
         $deleted = AuthController::getUserById($user['id']);
         $this->assertFalse($deleted);
+    }
+
+    public function testEditUserPermissionDenied()
+    {
+        // Create two users
+        $username1 = 'user1_' . uniqid();
+        $username2 = 'user2_' . uniqid();
+        $password = 'EditPass123';
+        $role = 'user';
+        AuthController::register($username1, $password, $role);
+        AuthController::register($username2, $password, $role);
+        $user1 = AuthController::findByUsername($username1);
+        $user2 = AuthController::findByUsername($username2);
+
+        // Log in as user1, try to edit user2
+        AuthController::login($username1, $password);
+        $result = AuthController::updateUser($user2['id'], 'shouldfail', 'parent');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Permission denied.', $result['message']);
+    }
+
+    public function testDeleteUserPermissionDenied()
+    {
+        // Create two users
+        $username1 = 'user1_' . uniqid();
+        $username2 = 'user2_' . uniqid();
+        $password = 'DeletePass123';
+        $role = 'user';
+        AuthController::register($username1, $password, $role);
+        AuthController::register($username2, $password, $role);
+        $user1 = AuthController::findByUsername($username1);
+        $user2 = AuthController::findByUsername($username2);
+
+        // Log in as user1, try to delete user2
+        AuthController::login($username1, $password);
+        $result = AuthController::deleteUser($user2['id']);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Permission denied.', $result['message']);
+    }
+
+    public function testUpdateUserToExistingUsername()
+    {
+        // Create two users
+        $username1 = 'user1_' . uniqid();
+        $username2 = 'user2_' . uniqid();
+        $password = 'EditPass123';
+        $role = 'user';
+        AuthController::register($username1, $password, $role);
+        AuthController::register($username2, $password, $role);
+        $user1 = AuthController::findByUsername($username1);
+
+        // Log in as user1, try to change username to username2
+        AuthController::login($username1, $password);
+        $result = AuthController::updateUser($user1['id'], $username2, 'user');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Username already exists.', $result['message']);
+    }
+
+    public function testDeleteNonExistentUser()
+    {
+        // Log in as a user
+        $username = 'deleter_' . uniqid();
+        $password = 'DeletePass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        AuthController::login($username, $password);
+
+        // Try to delete a non-existent user
+        $result = AuthController::deleteUser(999999); // unlikely to exist
+        $this->assertFalse($result['success']);
+    }
+
+    public function testUpdateUserInvalidRole()
+    {
+        $username = 'roleuser_' . uniqid();
+        $password = 'RolePass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+        $result = AuthController::updateUser($user['id'], 'roleuser2', 'invalidrole');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Invalid role specified.', $result['message']);
+    }
+
+    public function testUpdateUserEmptyUsername()
+    {
+        $username = 'emptyuser_' . uniqid();
+        $password = 'EmptyPass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+        $result = AuthController::updateUser($user['id'], '', 'user');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Username cannot be empty.', $result['message']);
+    }
+
+    public function testUpdateUserOnlyAdminCanAssignAdminRole()
+    {
+        // Register a normal user
+        $username = 'normal_' . uniqid();
+        $password = 'NormalPass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+        $result = AuthController::updateUser($user['id'], 'normaluser', 'admin');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Only admins can assign the admin role.', $result['message']);
     }
 }
