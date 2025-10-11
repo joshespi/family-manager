@@ -181,7 +181,7 @@ class AuthControllerTest extends TestCase
 
         // Delete user
         $result = AuthController::deleteUser($user['id']);
-        $this->assertTrue($result);
+        $this->assertTrue($result['success']);
         $deleted = AuthController::getUserById($user['id']);
         $this->assertFalse($deleted);
     }

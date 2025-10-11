@@ -39,6 +39,13 @@ seed database with a few users
 
 ```bash
 php config/seeder.php
+
+## Run Tests (PHPPest)
+
+from project directory.
+
+```bash
+./vendor/bin/pest
 ```
 
 ### Access the Application
