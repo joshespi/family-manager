@@ -3,6 +3,7 @@
 ## Environment Configuration
 Create a `.env` file with the following variables:
 ```
+APP_VERSION=2.1.0
 DB_HOST=famman_db
 DB_PORT=33306
 DB_ROOT_PASS=root
