@@ -304,4 +304,42 @@ class AuthControllerTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Only admins can assign the admin role.', $result['message']);
     }
+
+    public function testCannotDeleteOnlyParent()
+    {
+        // Register a parent
+        $username = 'parent_' . uniqid();
+        $password = 'ParentPass123';
+        $role = 'parent';
+        AuthController::register($username, $password, $role);
+        $parent = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+
+        // Try to delete self (only parent in family)
+        $result = AuthController::deleteUser($parent['id']);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Cannot delete the only parent in the family.', $result['message']);
+    }
+
+    public function testCannotDeleteLastAdmin()
+    {
+        // Make sure the seed has run and only one admin exists
+        // Log in as the seeded admin
+        AuthController::login('admin', 'admin');
+
+        // Find the admin's user ID
+        $admin = AuthController::findByUsername('admin');
+        $adminId = $admin['id'];
+
+        // Try to delete the last admin
+        $result = AuthController::deleteUser($adminId);
+
+        // Debug output if needed
+        // var_dump($result);
+
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Cannot delete the last admin account.', $result['message']);
+    }
 }

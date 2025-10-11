@@ -293,6 +293,31 @@ class User
         if (!self::canManageUser($actingUserId, $id)) {
             return ['success' => false, 'message' => 'Permission denied.'];
         }
+
+        $role = self::getPermissions($id)['role'] ?? null;
+
+        // Prevent deleting the last admin
+        if ($role === 'admin') {
+            $admins = array_filter(self::fetchAllWithPermissionsAndSettings(), fn($u) => $u['role'] === 'admin');
+            if (count($admins) <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the last admin account.'];
+            }
+        }
+
+        // Prevent deleting the only parent in a family
+        if ($role === 'parent') {
+            $family = self::getAllFamily($id);
+            $parentCount = 0;
+            foreach ($family as $member) {
+                if (self::getPermissions($member['id'])['role'] === 'parent') {
+                    $parentCount++;
+                }
+            }
+            if ($parentCount <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the only parent in the family.'];
+            }
+        }
+
         $pdo = \Database::getConnection();
 
         // Log the deletion
@@ -315,6 +340,9 @@ class User
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         $result = $stmt->execute([$id]);
 
-        return $result;
+        if ($result) {
+            return ['success' => true, 'message' => 'User deleted successfully.'];
+        }
+        return ['success' => false, 'message' => 'Delete failed.'];
     }
 }

@@ -215,15 +215,45 @@ class AuthController
         }
         $user = User::findBy('id', $user_id);
         if (!$user) {
-            return false;
+            return ['success' => false, 'message' => 'User not found.'];
+        }
+
+        // Prevent deleting the last admin
+        $role = self::getUserRole($user_id);
+        if ($role === 'admin') {
+            $admins = array_filter(User::fetchAllWithPermissionsAndSettings(), fn($u) => $u['role'] === 'admin');
+            if (count($admins) <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the last admin account.'];
+            }
+        }
+
+        // Prevent deleting the only parent in a family
+        if ($role === 'parent') {
+            $family = User::getAllFamily($user_id);
+            $parentCount = 0;
+            foreach ($family as $member) {
+                if (self::getUserRole($member['id']) === 'parent') {
+                    $parentCount++;
+                }
+            }
+            if ($parentCount <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the only parent in the family.'];
+            }
         }
 
         $result = User::deleteUser($user_id);
+
+        // If the model returns an array, it's an error or special case
+        if (is_array($result)) {
+            return $result;
+        }
+
         if ($result) {
             // Log the deletion
             global $pdo;
             LoggerController::log(null, 'DELETE_USER', "User deleted: ID $user_id");
+            return ['success' => true, 'message' => 'User deleted successfully.'];
         }
-        return $result;
+        return ['success' => false, 'message' => 'Delete failed.'];
     }
 }
