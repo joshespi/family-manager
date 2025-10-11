@@ -1,11 +1,7 @@
 FROM php:8.4-apache
 
 # Install system dependencies and PHP extensions
-RUN apt-get update && \
-    apt-get install -y git unzip libzip-dev && \
-    docker-php-ext-install pdo pdo_mysql && \
-    docker-php-ext-install zip
-
+RUN docker-php-ext-install pdo pdo_mysql
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
