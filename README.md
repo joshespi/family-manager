@@ -38,10 +38,8 @@ docker-compose up -d --build
 
 ### Seed the Database
 
-Enter the web container and run:
-
 ```bash
-php config/migrate.php
+docker exec familymanager-famman_web-1 php config/migrate.php
 ```
 
 **Important:**  
@@ -51,7 +49,7 @@ Be sure to log in and update your admin password immediately for security.
 seed database with a few users
 
 ```bash
-php config/seeder.php
+docker exec familymanager-famman_web-1 php config/seeder.php
 ```
 
 ## Run Tests (PHPPest)
