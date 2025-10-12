@@ -4,6 +4,7 @@
 
 use App\Controllers\AuthController;
 use App\Controllers\TaskController;
+use App\Controllers\SessionManager;
 
 $pdo = Database::getConnection();
 $family_id = AuthController::getParentID($_SESSION['user_id']);
@@ -19,6 +20,9 @@ $taskController = new TaskController($pdo);
 <?php endif; ?>
 <?php
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     if ($_POST['action'] === 'complete') {
         $taskController->completeTask((int)$_POST['task_id']);
         $_SESSION['system_message'] = "Task marked as complete!";

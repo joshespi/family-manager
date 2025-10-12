@@ -1,5 +1,7 @@
 <?php
 
+use App\Controllers\SessionManager;
+
 /** @var array|null $task */
 /** @var array $users */
 ?>
@@ -13,6 +15,8 @@
             </div>
             <div class="modal-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
+
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
                     <div class="mb-3">

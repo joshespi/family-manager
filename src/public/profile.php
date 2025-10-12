@@ -3,6 +3,7 @@ require_once __DIR__ . '/start.php';
 require_once __DIR__ . '/auth_check.php';
 
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 $subAccounts = [];
 $userPermissions = $userPermissions ?? ['permissions' => [], 'role' => 'guest']; // Ensure $userPermissions is defined
@@ -18,6 +19,9 @@ if (in_array('parent_user', $userPermissions['permissions'])) {
 
 // Handle sub user creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     if (isset($_POST['create_user'])) {
         if (
             ($userPermissions['role'] === 'user' || $userPermissions['role'] === 'admin') &&

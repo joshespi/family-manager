@@ -1,12 +1,17 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 require_once __DIR__ . '/start.php';
 require_once __DIR__ . '/auth_check.php';
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
+
     $id = (int)($_POST['id'] ?? 0);
     $username = trim($_POST['username'] ?? '');
     $role = trim($_POST['role'] ?? '');

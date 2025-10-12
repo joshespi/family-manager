@@ -1,11 +1,15 @@
 <?php
 
+use App\Controllers\SessionManager;
+
 $allUsers = $allUsers ?? [];
 
 foreach ($allUsers as $user): ?>
     <div class="modal fade" id="editUserModal<?= $user['id'] ?>" tabindex="-1" aria-labelledby="editUserModalLabel<?= $user['id'] ?>" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="edit_user.php">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
+
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="editUserModalLabel<?= $user['id'] ?>">Edit User: <?= htmlspecialchars($user['username']) ?></h5>

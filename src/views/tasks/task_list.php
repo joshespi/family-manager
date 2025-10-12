@@ -1,6 +1,7 @@
 <?php
 
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 /** @var array $tasks */
 /** @var bool $isParent */
@@ -28,11 +29,14 @@ use App\Controllers\AuthController;
                     <div class="mt-auto d-flex align-items-center">
                         <?php if (empty($task['completed'])): ?>
                             <form method="POST" class="me-2">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
+
                                 <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
                                 <input type="hidden" name="action" value="complete">
                                 <button type="submit" class="btn btn-success btn-sm">Complete</button>
                             </form>
                             <form method="POST" class="me-2">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
 
                                 <!-- Edit Button (shows modal) -->
                                 <?php if ($isParent):
@@ -48,6 +52,8 @@ use App\Controllers\AuthController;
                             </form>
                         <?php else: ?>
                             <form method="POST" class="mt-auto">
+                                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
+
                                 <input type="hidden" name="task_id" value="<?= $task['id'] ?>">
                                 <input type="hidden" name="action" value="uncomplete">
                                 <button type="submit" class="btn btn-warning btn-sm">Uncomplete</button>

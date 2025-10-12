@@ -2,6 +2,7 @@
 
 use App\Controllers\TaskController;
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 $pdo = Database::getConnection();
 $family_id = AuthController::getParentID($_SESSION['user_id']);
@@ -14,6 +15,9 @@ $isChild = isset($permissions) && in_array('child_user', $permissions);
 
 // Handle task POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     $taskController = new TaskController($pdo);
     if ($_POST['action'] === 'edit') {
         $taskController->updateTask([

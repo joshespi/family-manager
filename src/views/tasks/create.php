@@ -4,12 +4,16 @@
 
 use App\Controllers\TaskController;
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 // Fetch users (family members) from the database
 $users = AuthController::getAllFamily($_SESSION['user_id']);
 $family_id = AuthController::getParentID($_SESSION['user_id']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task_id'])) {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     $taskController = new TaskController($pdo);
     $success = $taskController->completeTask((int)$_POST['complete_task_id']);
     $_SESSION['system_message'] = $success ? "Task marked as completed!" : "Error completing task.";
@@ -18,6 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_task_id'])) 
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     $controller = new TaskController($pdo);
     $assigned_to = !empty($_POST['assigned_to']) ? (int)$_POST['assigned_to'] : null;
     $reward_units = isset($_POST['reward_units']) && $_POST['reward_units'] !== '' ? (float)$_POST['reward_units'] : null;
@@ -55,6 +62,8 @@ if (isset($_SESSION['system_message'])) {
             </div>
             <div class="modal-body">
                 <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
+
                     <div class="mb-3">
                         <label for="task_name" class="form-label">Task Name:</label>
                         <input type="text" id="task_name" name="name" class="form-control" required>
