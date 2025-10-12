@@ -342,4 +342,19 @@ class AuthControllerTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Cannot delete the last admin account.', $result['message']);
     }
+    public function testChildCannotManageAnyAccount()
+    {
+        // Simulate a child user session
+        $_SESSION['user_id'] = 3; // Assume user ID 3 is a child
+
+        // Mock the getUserRole method to return 'child'
+        $authControllerMock = $this->getMockBuilder(AuthController::class)
+            ->onlyMethods(['getUserRole'])
+            ->getMock();
+        $authControllerMock->method('getUserRole')->willReturn('child');
+
+        // Assert that the child cannot manage any account
+        $this->assertFalse($authControllerMock->canCurrentUserManage(1)); // Trying to manage user ID 1
+        $this->assertFalse($authControllerMock->canCurrentUserManage(3)); // Trying to manage their own account
+    }
 }
