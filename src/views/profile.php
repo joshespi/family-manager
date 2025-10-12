@@ -1,5 +1,9 @@
 <?php
 
+/** @var array $user */
+/** @var string $role */
+/** @var array $permissions */
+
 use App\Controllers\AuthController;
 
 if (!empty($_SESSION['message'])): ?>

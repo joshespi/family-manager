@@ -5,6 +5,7 @@ use App\Controllers\AuthController;
 use App\Controllers\SessionManager;
 
 
+
 $pdo = Database::getConnection();
 $error = '';
 $success = '';
@@ -22,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $role = $_POST['role'] ?? 'user';
 
 
-        $result = AuthController::register($username, $password, $role, $pdo);
+        $result = AuthController::register($username, $password, $role);
         if ($result['success']) {
             $_SESSION['flash'] = "Registration successful! You can now log in.";
             header("Location: /index.php");
@@ -32,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
 
 $csrfToken = SessionManager::generateCsrfToken();
 render('register', [

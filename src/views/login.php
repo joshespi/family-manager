@@ -1,3 +1,8 @@
+<?php
+
+/** @var string $csrfToken */
+?>
+
 <h2 class="text-center mb-4">Login</h2>
 
 <?php if (!empty($_SESSION['flash'])): ?>

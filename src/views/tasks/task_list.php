@@ -1,6 +1,10 @@
 <?php
 
 use App\Controllers\AuthController;
+
+/** @var array $tasks */
+/** @var bool $isParent */
+
 ?>
 
 <div class="row g-3">

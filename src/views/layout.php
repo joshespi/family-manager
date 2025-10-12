@@ -1,8 +1,16 @@
+<?php
+
+/** @var \PDO|null $pdo */
+/** @var string $title */
+/** @var string $content */
+/** @var string $app_Version */
+/** @var string|null $message */
+?>
 <!DOCTYPE html>
 <html>
 
 <head>
-    <title><?= htmlspecialchars($title ?? 'App') ?> | Family Manager</title>
+    <title><?= htmlspecialchars($title) ?> | Family Manager</title>
     <!-- Bootstrap CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <meta charset="UTF-8">

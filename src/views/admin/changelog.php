@@ -1,3 +1,7 @@
+<?php
+
+/** @var array $logs */
+?>
 <h2>Change Log</h2>
 
 <table>

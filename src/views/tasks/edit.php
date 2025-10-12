@@ -1,3 +1,8 @@
+<?php
+
+/** @var array|null $task */
+/** @var array $users */
+?>
 <!-- Edit Task Modal -->
 <div class="modal fade" id="editTaskModal<?= $task['id'] ?>" tabindex="-1" aria-labelledby="editTaskModalLabel<?= $task['id'] ?>" aria-hidden="true">
     <div class="modal-dialog">

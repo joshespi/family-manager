@@ -1,5 +1,7 @@
 <?php
 
+/** @var string $user */
+
 use App\Controllers\AuthController;
 use App\Controllers\TaskController;
 

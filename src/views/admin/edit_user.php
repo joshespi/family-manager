@@ -1,4 +1,8 @@
-<?php foreach ($allUsers as $user): ?>
+<?php
+
+$allUsers = $allUsers ?? [];
+
+foreach ($allUsers as $user): ?>
     <div class="modal fade" id="editUserModal<?= $user['id'] ?>" tabindex="-1" aria-labelledby="editUserModalLabel<?= $user['id'] ?>" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" action="edit_user.php">

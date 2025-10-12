@@ -1,5 +1,7 @@
 <?php
 
+/** @var \PDO|null $pdo */
+
 use App\Controllers\TaskController;
 use App\Controllers\AuthController;
 

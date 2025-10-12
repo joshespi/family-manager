@@ -5,13 +5,18 @@ require_once __DIR__ . '/auth_check.php';
 use App\Controllers\AuthController;
 
 $subAccounts = [];
+$userPermissions = $userPermissions ?? ['permissions' => [], 'role' => 'guest']; // Ensure $userPermissions is defined
+$user = $user ?? ['username' => 'Guest']; // Ensure $user is defined
+$pdo = $pdo ?? null; // Ensure $pdo is defined
+$message = '';
+
+
 // Fetch sub-accounts if user has permission
 if (in_array('parent_user', $userPermissions['permissions'])) {
     $subAccounts = AuthController::getSubAccounts($_SESSION['user_id']);
 }
 
 // Handle sub user creation
-$message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['create_user'])) {
         if (

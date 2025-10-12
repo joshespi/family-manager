@@ -1,3 +1,7 @@
+<?php
+
+/** @var string $csrfToken */
+?>
 <h2 class="text-center mb-4">Register</h2>
 <?php if (!empty($error)): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?> <a href="/register.php" class="alert-link">Try again</a>.</div>
