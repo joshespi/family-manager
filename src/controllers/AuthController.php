@@ -12,7 +12,21 @@ class AuthController
     {
         $actingUserId = SessionManager::get('user_id');
         if (!$actingUserId) return false;
-        return \App\Models\User::canManageUser($actingUserId, $targetUserId);
+
+        // fetch the acting user's role
+        $actingUserRole = self::getUserRole($actingUserId);
+
+        // Admins can manage anyone
+        if ($actingUserRole === 'admin') {
+            return true;
+        }
+
+        // Restrict child accounts from managing anyone
+        if ($actingUserRole === 'child') {
+            return false;
+        }
+
+        return User::canManageUser($actingUserId, $targetUserId);
     }
 
 
