@@ -11,13 +11,8 @@ $allUsers = AuthController::getUserPermissionsAndSettings();
 $filterType = $_GET['type'] ?? null;
 $logs = LoggerController::getAll($filterType);
 
-// Ensure $userPermissions is defined
 $userPermissions = $userPermissions ?? ['permissions' => [], 'role' => 'guest'];
-
-// Ensure $pdo is defined
 $pdo = $pdo ?? null;
-
-// Ensure $user is defined
 $user = $user ?? ['username' => 'Guest'];
 
 
@@ -32,5 +27,4 @@ render('admin', [
     'allUsers' => $allUsers,
     'logs' => $logs,
     'filterType' => $filterType,
-
 ]);
