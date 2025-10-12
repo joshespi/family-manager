@@ -65,7 +65,7 @@ class User
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ?');
         $stmt->execute([$username]);
         if ($stmt->fetchColumn() > 0) {
-            return ['success' => false, 'message' => 'Username already exists.'];
+            return ['success' => false, 'message' => 'This username is already taken. Please choose another.'];
         }
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
