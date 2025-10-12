@@ -8,6 +8,20 @@ class SessionManager
     {
         return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
     }
+
+    private static function checkExpiration()
+    {
+        $timeout = 30 * 60; // minutes
+        if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout)) {
+            self::destroy();
+            header('Location: /index.php?expired=1');
+            exit();
+        }
+        $_SESSION['last_activity'] = time();
+    }
+
+
+
     // Create
     public static function start()
     {
@@ -22,6 +36,8 @@ class SessionManager
             ]);
             session_start();
         }
+        // Add session expiration logic
+        self::checkExpiration();
     }
 
     public static function regenerate()
@@ -59,11 +75,6 @@ class SessionManager
     // Delete
     public static function destroy()
     {
-        $_SESSION = [];
-        session_unset();
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_destroy();
-        }
         // Remove session cookie
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
@@ -76,6 +87,11 @@ class SessionManager
                 $params["secure"],
                 $params["httponly"]
             );
+        }
+        $_SESSION = [];
+        session_unset();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
         }
     }
 }
