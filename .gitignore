@@ -2,3 +2,4 @@
 /vendor/
 .env
 src/public/phpinfo.php
+.phpunit.result.cache
