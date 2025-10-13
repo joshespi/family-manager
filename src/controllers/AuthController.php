@@ -31,7 +31,7 @@ class AuthController
 
 
     // Create
-    public static function register($username, $password, $role)
+    public static function register($username, $password, $role, $parentId = null)
     {
         if (empty($username) || empty($password)) {
             return ['success' => false, 'message' => 'Username and password cannot be empty.'];
@@ -51,15 +51,19 @@ class AuthController
             return ['success' => false, 'message' => 'Username already exists.'];
         }
 
-        $created = User::create($username, $password, $role);
+        $created = User::create($username, $password, $role, $parentId);
+
+        // Check for error from User::create
+        if (is_array($created) && isset($created['success']) && !$created['success']) {
+            return $created;
+        }
 
         if ($created) {
             $user = User::findBy('username', $username);
             $userId = $user ? $user['id'] : null;
             // Log the registration
-            global $pdo;
             LoggerController::log(null, 'REGISTER', "New user registered: $username ($role)");
-            return ['success' => true, 'message' => 'Registration successful.', 'user_id' => $userId];
+            return ['success' => true, 'message' => 'Registration successful.', 'user_id' => $userId, 'user' => $user];
         }
 
         return ['success' => false, 'message' => 'Registration failed.'];

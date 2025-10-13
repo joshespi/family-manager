@@ -357,4 +357,34 @@ class AuthControllerTest extends TestCase
         $this->assertFalse($authControllerMock->canCurrentUserManage(1)); // Trying to manage user ID 1
         $this->assertFalse($authControllerMock->canCurrentUserManage(3)); // Trying to manage their own account
     }
+
+    public function testCannotRegisterUserWithNonexistentParent()
+    {
+        // Try to register a user with a parent_id that does not exist
+        $result = AuthController::register('testchild_x', 'Password123', 'child', 999999);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Parent account does not exist', $result['message']);
+    }
+
+    public function testCanRegisterUserWithNullParent()
+    {
+        // Register a top-level parent user
+        $result = AuthController::register('testparent_x', 'Password123', 'parent', null);
+        $this->assertTrue($result['success']);
+        $this->assertArrayHasKey('user', $result);
+    }
+
+    public function testCanRegisterUserWithValidParent()
+    {
+        // Register a parent user first
+        $parentResult = AuthController::register('testparent_y', 'Password123', 'parent', null);
+        $this->assertTrue($parentResult['success']);
+        $parentId = $parentResult['user']['id'] ?? null;
+        $this->assertNotNull($parentId);
+
+        // Now register a child user with that parent ID
+        $childResult = AuthController::register('testchild_y', 'Password123', 'child', $parentId);
+        $this->assertTrue($childResult['success']);
+        $this->assertArrayHasKey('user', $childResult);
+    }
 }
