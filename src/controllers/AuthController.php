@@ -228,6 +228,10 @@ class AuthController
 
     public static function deleteUser($user_id)
     {
+        $currentUserId = SessionManager::get('user_id');
+        if ($user_id == $currentUserId) {
+            return ['success' => false, 'message' => 'You cannot delete your own account.'];
+        }
         if (!self::canCurrentUserManage($user_id)) {
             return ['success' => false, 'message' => 'Permission denied.'];
         }
