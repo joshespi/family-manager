@@ -25,10 +25,5 @@
         
     },
     "minimum-stability": "stable",
-    "prefer-stable": true,
-    "config": {
-        "allow-plugins": {
-            "pestphp/pest-plugin": true
-        }
-    }
+    "prefer-stable": true
 }
