@@ -8,8 +8,7 @@ services:
     ports:
       - "8040:80"
     volumes:
-      - ./src:/var/www/html
-      - ./vendor:/var/www/html/vendor
+      - ./src:/var/www/html/src
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
