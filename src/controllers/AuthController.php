@@ -7,13 +7,36 @@ use App\Controllers\LoggerController;
 
 class AuthController
 {
+    //helpers
+    public static function canCurrentUserManage($targetUserId)
+    {
+        $actingUserId = SessionManager::get('user_id');
+        if (!$actingUserId) return false;
+
+        // fetch the acting user's role
+        $actingUserRole = self::getUserRole($actingUserId);
+
+        // Admins can manage anyone
+        if ($actingUserRole === 'admin') {
+            return true;
+        }
+
+        // Restrict child accounts from managing anyone
+        if ($actingUserRole === 'child') {
+            return false;
+        }
+
+        return User::canManageUser($actingUserId, $targetUserId);
+    }
+
+
     // Create
-    public static function register($username, $password, $role)
+    public static function register($username, $password, $role, $parentId = null)
     {
         if (empty($username) || empty($password)) {
             return ['success' => false, 'message' => 'Username and password cannot be empty.'];
         }
-        $allowedRoles = ['user', 'admin', 'parent', 'child'];
+        $allowedRoles = ['user', 'parent', 'child'];
         if (!in_array($role, $allowedRoles)) {
             return [
                 'success' => false,
@@ -28,15 +51,19 @@ class AuthController
             return ['success' => false, 'message' => 'Username already exists.'];
         }
 
-        $created = User::create($username, $password, $role);
+        $created = User::create($username, $password, $role, $parentId);
+
+        // Check for error from User::create
+        if (is_array($created) && isset($created['success']) && !$created['success']) {
+            return $created;
+        }
 
         if ($created) {
             $user = User::findBy('username', $username);
             $userId = $user ? $user['id'] : null;
             // Log the registration
-            global $pdo;
             LoggerController::log(null, 'REGISTER', "New user registered: $username ($role)");
-            return ['success' => true, 'message' => 'Registration successful.', 'user_id' => $userId];
+            return ['success' => true, 'message' => 'Registration successful.', 'user_id' => $userId, 'user' => $user];
         }
 
         return ['success' => false, 'message' => 'Registration failed.'];
@@ -152,13 +179,29 @@ class AuthController
     // Update
     public static function updateUser($user_id, $newUsername, $newRole)
     {
+        // Check if current user can manage the target user
+        if (!self::canCurrentUserManage($user_id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
+
+        // data validation
+        if (empty($newUsername)) {
+            return ['success' => false, 'message' => 'Username cannot be empty.'];
+        }
+
         $user = User::findBy('id', $user_id);
         if (!$user) {
             return ['success' => false, 'message' => 'User not found.'];
         }
         $allowedRoles = ['user', 'admin', 'parent', 'child'];
+
+        // permission checks
         if (!in_array($newRole, $allowedRoles)) {
             return ['success' => false, 'message' => 'Invalid role specified.'];
+        }
+        $currentUserRole = self::getUserRole(SessionManager::get('user_id'));
+        if ($newRole === 'admin' && $currentUserRole !== 'admin') {
+            return ['success' => false, 'message' => 'Only admins can assign the admin role.'];
         }
         if ($newUsername !== $user['username'] && User::findBy('username', $newUsername)) {
             return ['success' => false, 'message' => 'Username already exists.'];
@@ -185,17 +228,54 @@ class AuthController
 
     public static function deleteUser($user_id)
     {
+        $currentUserId = SessionManager::get('user_id');
+        if ($user_id == $currentUserId) {
+            return ['success' => false, 'message' => 'You cannot delete your own account.'];
+        }
+        if (!self::canCurrentUserManage($user_id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
         $user = User::findBy('id', $user_id);
         if (!$user) {
-            return false;
+            return ['success' => false, 'message' => 'User not found.'];
+        }
+
+        // Prevent deleting the last admin
+        $role = self::getUserRole($user_id);
+        if ($role === 'admin') {
+            $admins = array_filter(User::fetchAllWithPermissionsAndSettings(), fn($u) => $u['role'] === 'admin');
+            if (count($admins) <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the last admin account.'];
+            }
+        }
+
+        // Prevent deleting the only parent in a family
+        if ($role === 'parent') {
+            $family = User::getAllFamily($user_id);
+            $parentCount = 0;
+            foreach ($family as $member) {
+                if (self::getUserRole($member['id']) === 'parent') {
+                    $parentCount++;
+                }
+            }
+            if ($parentCount <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the only parent in the family.'];
+            }
         }
 
         $result = User::deleteUser($user_id);
+
+        // If the model returns an array, it's an error or special case
+        if (is_array($result)) {
+            return $result;
+        }
+
         if ($result) {
             // Log the deletion
             global $pdo;
             LoggerController::log(null, 'DELETE_USER', "User deleted: ID $user_id");
+            return ['success' => true, 'message' => 'User deleted successfully.'];
         }
-        return $result;
+        return ['success' => false, 'message' => 'Delete failed.'];
     }
 }

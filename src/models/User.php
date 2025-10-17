@@ -18,7 +18,34 @@ class User
         }
         return ['success' => true];
     }
+    public static function canManageUser($actingUserId, $targetUserId)
+    {
+        if (!$actingUserId || !$targetUserId) return false;
 
+        $actingPerms = self::getPermissions($actingUserId);
+        $actingRole = $actingPerms['role'];
+
+        // Admin can manage anyone
+        if ($actingRole === 'admin') return true;
+
+        // Parent/user can manage self or family members (same parent_id)
+        if (in_array($actingRole, ['parent', 'user'])) {
+            $actingUser = self::findBy('id', $actingUserId);
+            $targetUser = self::findBy('id', $targetUserId);
+            if (!$actingUser || !$targetUser) return false;
+
+            // Self or same family
+            if (
+                $actingUserId == $targetUserId ||
+                $actingUser['parent_id'] == $targetUser['parent_id']
+            ) {
+                return true;
+            }
+        }
+
+        // Otherwise, not allowed
+        return false;
+    }
 
 
 
@@ -34,12 +61,23 @@ class User
         }
         $pdo = \Database::getConnection();
 
+        // Check if parentId exists (unless null)
+        if ($parentId !== null) {
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE id = ?');
+            $stmt->execute([$parentId]);
+            if ($stmt->fetchColumn() == 0) {
+                return ['success' => false, 'message' => 'Parent account does not exist.'];
+            }
+        }
+
         // Check if username already exists
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE username = ?');
         $stmt->execute([$username]);
         if ($stmt->fetchColumn() > 0) {
-            return ['success' => false, 'message' => 'Username already exists.'];
+            return ['success' => false, 'message' => 'This username is already taken. Please choose another.'];
         }
+
+
 
         $hash = password_hash($password, PASSWORD_DEFAULT);
         $stmt = $pdo->prepare('INSERT INTO users (username, password, parent_id) VALUES (?, ?, ?)');
@@ -223,6 +261,18 @@ class User
     // Update
     public static function updateUser($id, $username, $role)
     {
+        //// Check permissions
+        // Check if current user can manage the target user
+        $actingUserId = $_SESSION['user_id'] ?? null;
+        if (!self::canManageUser($actingUserId, $id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
+
+        // Prevent non-admins from assigning the admin role
+        $actingPerms = self::getPermissions($actingUserId);
+        if ($role === 'admin' && $actingPerms['role'] !== 'admin') {
+            return ['success' => false, 'message' => 'Only admins can assign the admin role.'];
+        }
         $pdo = \Database::getConnection();
 
         // Update username
@@ -250,7 +300,45 @@ class User
     // Delete
     public static function deleteUser($id)
     {
+        $actingUserId = $_SESSION['user_id'] ?? null;
+        if (!self::canManageUser($actingUserId, $id)) {
+            return ['success' => false, 'message' => 'Permission denied.'];
+        }
+
+        $role = self::getPermissions($id)['role'] ?? null;
+
+        // Prevent deleting the last admin
+        if ($role === 'admin') {
+            $admins = array_filter(self::fetchAllWithPermissionsAndSettings(), fn($u) => $u['role'] === 'admin');
+            if (count($admins) <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the last admin account.'];
+            }
+        }
+
+        // Prevent deleting the only parent in a family
+        if ($role === 'parent') {
+            $family = self::getAllFamily($id);
+            $parentCount = 0;
+            foreach ($family as $member) {
+                if (self::getPermissions($member['id'])['role'] === 'parent') {
+                    $parentCount++;
+                }
+            }
+            if ($parentCount <= 1) {
+                return ['success' => false, 'message' => 'Cannot delete the only parent in the family.'];
+            }
+        }
+
         $pdo = \Database::getConnection();
+
+        // Log the deletion
+        $actingUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+        Logger::log(
+            $pdo,
+            $actingUserId,
+            'DELETE_USER',
+            "User ID $id deleted"
+        );
 
         // Delete tasks assigned to this user
         $pdo->prepare("DELETE FROM tasks WHERE assigned_to = ?")->execute([$id]);
@@ -263,15 +351,9 @@ class User
         $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
         $result = $stmt->execute([$id]);
 
-        // Log the deletion
-        $actingUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-        Logger::log(
-            $pdo,
-            $actingUserId,
-            'DELETE_USER',
-            "User ID $id deleted"
-        );
-
-        return $result;
+        if ($result) {
+            return ['success' => true, 'message' => 'User deleted successfully.'];
+        }
+        return ['success' => false, 'message' => 'Delete failed.'];
     }
 }

@@ -1,5 +1,10 @@
 <?php
 
+/** @var array{permissions: array, role: string} $userPermissions */
+/** @var array{username: string} $user */
+/** @var \PDO $pdo */
+/** @var array $allUsers */
+
 if (!empty($role) && $role !== 'admin') {
     header('Location: /dashboard.php');
     exit;

@@ -9,12 +9,13 @@ services:
       - "8040:80"
     volumes:
       - ./src:/var/www/html
+      - ./vendor:/var/www/html/vendor
     environment:
       - DB_HOST=${DB_HOST}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
       - DB_NAME=${DB_NAME}
-      - APP_VERSION=2.0.0
+      - APP_VERSION=${APP_VERSION}
       - DEV_MODE=${DEV_MODE}
     restart: always
     depends_on:

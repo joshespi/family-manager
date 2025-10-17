@@ -1,5 +1,5 @@
 /db_data/
-/src/vendor/
+/vendor/
 .env
-.phpunit.result.cache
 src/public/phpinfo.php
+.phpunit.result.cache

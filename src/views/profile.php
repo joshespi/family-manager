@@ -1,6 +1,11 @@
 <?php
 
+/** @var array $user */
+/** @var string $role */
+/** @var array $permissions */
+
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 if (!empty($_SESSION['message'])): ?>
     <div class="alert alert-info"><?= htmlspecialchars($_SESSION['message']) ?></div>
@@ -31,6 +36,8 @@ if (!empty($_SESSION['message'])): ?>
                     </div>
                     <div class="modal-body">
                         <form method="POST" action="profile.php" class="p-2">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(SessionManager::generateCsrfToken()); ?>">
+
                             <div class="mb-3">
                                 <label for="new_username" class="form-label">Username:</label>
                                 <input type="text" id="new_username" name="new_username" class="form-control" required>

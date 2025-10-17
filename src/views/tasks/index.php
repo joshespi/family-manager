@@ -2,6 +2,7 @@
 
 use App\Controllers\TaskController;
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 $pdo = Database::getConnection();
 $family_id = AuthController::getParentID($_SESSION['user_id']);
@@ -14,17 +15,37 @@ $isChild = isset($permissions) && in_array('child_user', $permissions);
 
 // Handle task POST requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     $taskController = new TaskController($pdo);
     if ($_POST['action'] === 'edit') {
-        $taskController->updateTask([
-            'task_id' => (int)$_POST['task_id'],
-            'name' => trim($_POST['name']),
-            'description' => trim($_POST['description']),
-            'reward_units' => isset($_POST['reward_units']) ? (int)$_POST['reward_units'] : null,
-            'due_date' => trim($_POST['due_date']),
-            'assigned_to' => (int)$_POST['assigned_to'],
-        ]);
-        $_SESSION['system_message'] = "Task updated!";
+        // Sanitize and validate input
+        $task_id = (int)$_POST['task_id'];
+        $name = trim($_POST['name']);
+        $description = trim($_POST['description']);
+        $reward_units = isset($_POST['reward_units']) ? (float)$_POST['reward_units'] : null;
+        $due_date = trim($_POST['due_date']);
+        $assigned_to = (int)$_POST['assigned_to'];
+
+        // Validation
+        if (strlen($name) < 3 || strlen($name) > 100) {
+            $_SESSION['system_message'] = "Task name must be 3-100 characters.";
+        } elseif ($reward_units !== null && $reward_units < 0) {
+            $_SESSION['system_message'] = "Reward must be a positive number.";
+        } elseif ($due_date && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $due_date)) {
+            $_SESSION['system_message'] = "Invalid due date format.";
+        } else {
+            $taskController->updateTask([
+                'task_id' => $task_id,
+                'name' => htmlspecialchars($name),
+                'description' => htmlspecialchars($description),
+                'reward_units' => $reward_units,
+                'due_date' => $due_date,
+                'assigned_to' => $assigned_to,
+            ]);
+            $_SESSION['system_message'] = "Task updated!";
+        }
     }
 
     header("Location: " . $_SERVER['REQUEST_URI']);

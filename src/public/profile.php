@@ -3,16 +3,25 @@ require_once __DIR__ . '/start.php';
 require_once __DIR__ . '/auth_check.php';
 
 use App\Controllers\AuthController;
+use App\Controllers\SessionManager;
 
 $subAccounts = [];
+$userPermissions = $userPermissions ?? ['permissions' => [], 'role' => 'guest']; // Ensure $userPermissions is defined
+$user = $user ?? ['username' => 'Guest']; // Ensure $user is defined
+$pdo = $pdo ?? null; // Ensure $pdo is defined
+$message = '';
+
+
 // Fetch sub-accounts if user has permission
 if (in_array('parent_user', $userPermissions['permissions'])) {
     $subAccounts = AuthController::getSubAccounts($_SESSION['user_id']);
 }
 
 // Handle sub user creation
-$message = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!SessionManager::validateCsrfToken($_POST['csrf_token'] ?? '')) {
+        die('Invalid CSRF token');
+    }
     if (isset($_POST['create_user'])) {
         if (
             ($userPermissions['role'] === 'user' || $userPermissions['role'] === 'admin') &&

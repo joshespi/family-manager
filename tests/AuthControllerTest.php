@@ -152,6 +152,9 @@ class AuthControllerTest extends TestCase
         AuthController::register($username, $password, $role);
         $user = AuthController::findByUsername($username);
 
+        // Log in as the user to set $_SESSION['user_id']
+        AuthController::login($username, $password);
+
         // Edit user
         AuthController::updateUser($user['id'], 'editeduser', 'parent');
         $edited = AuthController::getUserById($user['id']);
@@ -166,12 +169,223 @@ class AuthControllerTest extends TestCase
         $password = 'DeletePass123';
         $role = 'user';
         AuthController::register($username, $password, $role);
+
+
+        // Log in as the user to set $_SESSION['user_id']
+        AuthController::login($username, $password);
+
         $user = AuthController::findByUsername($username);
         $this->assertNotFalse($user);
+
+
+
         // Delete user
         $result = AuthController::deleteUser($user['id']);
-        $this->assertTrue($result);
+        $this->assertfalse($result['success']);
+        $this->assertEquals('You cannot delete your own account.', $result['message']);
         $deleted = AuthController::getUserById($user['id']);
-        $this->assertFalse($deleted);
+        $this->assertNotFalse($deleted);
+    }
+
+    public function testEditUserPermissionDenied()
+    {
+        // Create two users
+        $username1 = 'user1_' . uniqid();
+        $username2 = 'user2_' . uniqid();
+        $password = 'EditPass123';
+        $role = 'user';
+        AuthController::register($username1, $password, $role);
+        AuthController::register($username2, $password, $role);
+        $user1 = AuthController::findByUsername($username1);
+        $user2 = AuthController::findByUsername($username2);
+
+        // Log in as user1, try to edit user2
+        AuthController::login($username1, $password);
+        $result = AuthController::updateUser($user2['id'], 'shouldfail', 'parent');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Permission denied.', $result['message']);
+    }
+
+    public function testDeleteUserPermissionDenied()
+    {
+        // Create two users
+        $username1 = 'user1_' . uniqid();
+        $username2 = 'user2_' . uniqid();
+        $password = 'DeletePass123';
+        $role = 'user';
+        AuthController::register($username1, $password, $role);
+        AuthController::register($username2, $password, $role);
+        $user1 = AuthController::findByUsername($username1);
+        $user2 = AuthController::findByUsername($username2);
+
+        // Log in as user1, try to delete user2
+        AuthController::login($username1, $password);
+        $result = AuthController::deleteUser($user2['id']);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Permission denied.', $result['message']);
+    }
+
+    public function testUpdateUserToExistingUsername()
+    {
+        // Create two users
+        $username1 = 'user1_' . uniqid();
+        $username2 = 'user2_' . uniqid();
+        $password = 'EditPass123';
+        $role = 'user';
+        AuthController::register($username1, $password, $role);
+        AuthController::register($username2, $password, $role);
+        $user1 = AuthController::findByUsername($username1);
+
+        // Log in as user1, try to change username to username2
+        AuthController::login($username1, $password);
+        $result = AuthController::updateUser($user1['id'], $username2, 'user');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Username already exists.', $result['message']);
+    }
+
+    public function testDeleteNonExistentUser()
+    {
+        // Log in as a user
+        $username = 'deleter_' . uniqid();
+        $password = 'DeletePass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        AuthController::login($username, $password);
+
+        // Try to delete a non-existent user
+        $result = AuthController::deleteUser(999999); // unlikely to exist
+        $this->assertFalse($result['success']);
+    }
+
+    public function testUpdateUserInvalidRole()
+    {
+        $username = 'roleuser_' . uniqid();
+        $password = 'RolePass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+        $result = AuthController::updateUser($user['id'], 'roleuser2', 'invalidrole');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Invalid role specified.', $result['message']);
+    }
+
+    public function testUpdateUserEmptyUsername()
+    {
+        $username = 'emptyuser_' . uniqid();
+        $password = 'EmptyPass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+        $result = AuthController::updateUser($user['id'], '', 'user');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Username cannot be empty.', $result['message']);
+    }
+
+    public function testUpdateUserOnlyAdminCanAssignAdminRole()
+    {
+        // Register a normal user
+        $username = 'normal_' . uniqid();
+        $password = 'NormalPass123';
+        $role = 'user';
+        AuthController::register($username, $password, $role);
+        $user = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+        $result = AuthController::updateUser($user['id'], 'normaluser', 'admin');
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('Only admins can assign the admin role.', $result['message']);
+    }
+
+    public function testCannotDeleteOnlyParent()
+    {
+        // Register a parent
+        $username = 'parent_' . uniqid();
+        $password = 'ParentPass123';
+        $role = 'parent';
+        AuthController::register($username, $password, $role);
+        $parent = AuthController::findByUsername($username);
+
+        AuthController::login($username, $password);
+
+        // Try to delete self (only parent in family)
+        $result = AuthController::deleteUser($parent['id']);
+        $this->assertIsArray($result);
+        $this->assertFalse($result['success']);
+        $this->assertEquals('You cannot delete your own account.', $result['message']);
+    }
+
+    public function testCannotDeleteLastAdmin()
+    {
+        // Make sure the seed has run and only one admin exists
+        // Log in as the seeded admin
+        AuthController::login('adminuser1', 'adminuser1');
+
+        // Find the admin's user ID
+        $admin = AuthController::findByUsername('adminuser1');
+        $adminId = $admin['id'];
+
+        // Try to delete the last admin
+        $result = AuthController::deleteUser($adminId);
+
+        // Debug output if needed
+        // var_dump($result);
+
+        $this->assertFalse($result['success']);
+        $this->assertEquals('You cannot delete your own account.', $result['message']);
+    }
+    public function testChildCannotManageAnyAccount()
+    {
+        // Simulate a child user session
+        $_SESSION['user_id'] = 3; // Assume user ID 3 is a child
+
+        // Mock the getUserRole method to return 'child'
+        $authControllerMock = $this->getMockBuilder(AuthController::class)
+            ->onlyMethods(['getUserRole'])
+            ->getMock();
+        $authControllerMock->method('getUserRole')->willReturn('child');
+
+        // Assert that the child cannot manage any account
+        $this->assertFalse($authControllerMock->canCurrentUserManage(1)); // Trying to manage user ID 1
+        $this->assertFalse($authControllerMock->canCurrentUserManage(3)); // Trying to manage their own account
+    }
+
+    public function testCannotRegisterUserWithNonexistentParent()
+    {
+        // Try to register a user with a parent_id that does not exist
+        $result = AuthController::register('testchild_x', 'Password123', 'child', 999999);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Parent account does not exist', $result['message']);
+    }
+
+    public function testCanRegisterUserWithNullParent()
+    {
+        // Register a top-level parent user
+        $result = AuthController::register('testparent_x', 'Password123', 'parent', null);
+        $this->assertTrue($result['success']);
+        $this->assertArrayHasKey('user', $result);
+    }
+
+    public function testCanRegisterUserWithValidParent()
+    {
+        // Register a parent user first
+        $parentResult = AuthController::register('testparent_y', 'Password123', 'parent', null);
+        $this->assertTrue($parentResult['success']);
+        $parentId = $parentResult['user']['id'] ?? null;
+        $this->assertNotNull($parentId);
+
+        // Now register a child user with that parent ID
+        $childResult = AuthController::register('testchild_y', 'Password123', 'child', $parentId);
+        $this->assertTrue($childResult['success']);
+        $this->assertArrayHasKey('user', $childResult);
     }
 }
