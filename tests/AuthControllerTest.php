@@ -181,9 +181,10 @@ class AuthControllerTest extends TestCase
 
         // Delete user
         $result = AuthController::deleteUser($user['id']);
-        $this->assertTrue($result['success']);
+        $this->assertfalse($result['success']);
+        $this->assertEquals('You cannot delete your own account.', $result['message']);
         $deleted = AuthController::getUserById($user['id']);
-        $this->assertFalse($deleted);
+        $this->assertNotFalse($deleted);
     }
 
     public function testEditUserPermissionDenied()
@@ -320,7 +321,7 @@ class AuthControllerTest extends TestCase
         $result = AuthController::deleteUser($parent['id']);
         $this->assertIsArray($result);
         $this->assertFalse($result['success']);
-        $this->assertEquals('Cannot delete the only parent in the family.', $result['message']);
+        $this->assertEquals('You cannot delete your own account.', $result['message']);
     }
 
     public function testCannotDeleteLastAdmin()
@@ -340,7 +341,7 @@ class AuthControllerTest extends TestCase
         // var_dump($result);
 
         $this->assertFalse($result['success']);
-        $this->assertEquals('Cannot delete the last admin account.', $result['message']);
+        $this->assertEquals('You cannot delete your own account.', $result['message']);
     }
     public function testChildCannotManageAnyAccount()
     {
