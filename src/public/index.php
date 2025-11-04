@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 $csrfToken = SessionManager::generateCsrfToken();
 render('login', [
-    'title' => 'Login',
+    'title' => '',
     'csrfToken' => $csrfToken,
     'error' => $error,
     'flash' => $_SESSION['flash'] ?? ''
