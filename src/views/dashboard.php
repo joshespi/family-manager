@@ -7,12 +7,26 @@ use App\Controllers\TaskController;
 use App\Controllers\SessionManager;
 
 $pdo = Database::getConnection();
-$family_id = AuthController::getParentID($_SESSION['user_id']);
+$user_id = $_SESSION['user_id'];
+$family_id = AuthController::getParentID($user_id);
 $taskController = new TaskController($pdo);
+
+$earned = $taskController->getTotalPointsEarned($user_id);
+$spent = $taskController->getTotalPointsSpent($user_id);
+$balance = $earned - $spent;
 
 ?>
 
-<h2>User: <?= $user ?></h2>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; align-items: center;">
+    <div>
+        <h2>User: <?= htmlspecialchars($user) ?></h2>
+    </div>
+    <div>
+        <h3 class="alert alert-info">
+            Points: <?= htmlspecialchars($balance) ?> (Earned: <?= htmlspecialchars($earned) ?>, Spent: <?= htmlspecialchars($spent) ?>)
+        </h3>
+    </div>
+</div>
 
 <?php if (isset($_SESSION['system_message'])): ?>
     <div class="alert alert-info"><?= htmlspecialchars($_SESSION['system_message']) ?></div>

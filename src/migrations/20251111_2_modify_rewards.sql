@@ -1,0 +1,2 @@
+ALTER TABLE tasks
+    MODIFY COLUMN reward_units FLOAT DEFAULT 0;

@@ -67,6 +67,20 @@ class Task
         $stmt->execute([$family_id]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public static function getTotalPointsEarned($pdo, $user_id)
+    {
+        $stmt = $pdo->prepare("SELECT SUM(reward_units) FROM tasks WHERE assigned_to = ? AND completed = 1 AND reward_units > 0");
+        $stmt->execute([$user_id]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    public static function getTotalPointsSpent($pdo, $user_id)
+    {
+        $stmt = $pdo->prepare("SELECT SUM(ABS(reward_units)) FROM tasks WHERE assigned_to = ? AND completed = 1 AND reward_units < 0");
+        $stmt->execute([$user_id]);
+        return (int) $stmt->fetchColumn();
+    }
+
 
 
     // Update

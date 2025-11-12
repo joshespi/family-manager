@@ -30,16 +30,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $timerController->stop($timerId);
 
+        // Fetch the timer again to get the updated end_time
+        $stmt = $pdo->prepare("SELECT * FROM timers WHERE id = ?");
+        $stmt->execute([$timerId]);
+        $timer = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if ($timer && $timer['start_time']) {
             $start = strtotime($timer['start_time']);
             $end = time(); // Now, since we just stopped it
-            $seconds = $end - $start;
-            $units = round($seconds / 60); // 1 unit per minute
+            $seconds = max(0, $end - $start);
+            error_log("Timer debug: start=$start, end=$end, seconds=$seconds");
+            error_log("Server timezone: " . date_default_timezone_get());
+            error_log("Current time: " . date('Y-m-d H:i:s'));
+            $units = max(0.01, round($seconds / 60, 2)); // Minimum 1 unit
 
             // Create deduction task for parent
             $result = $taskController->createTask([
                 'name' => 'Screen Time Deduction for ' . (AuthController::getUsernameName($_SESSION['user_id']) ?? 'Unknown User'),
-                'description' => "Child used $units units of screen time.",
+                'description' => "Child used " . round($units, 2) . " units of screen time.",
                 'reward_units' => -$units,
                 'assigned_to' => '',
                 'family_id' => $family_id

@@ -74,6 +74,15 @@ class TaskController
     {
         return Task::getCompletedTasksForFamily($this->pdo, $family_id);
     }
+    public function getTotalPointsEarned($user_id)
+    {
+        return Task::getTotalPointsEarned($this->pdo, $user_id);
+    }
+
+    public function getTotalPointsSpent($user_id)
+    {
+        return Task::getTotalPointsSpent($this->pdo, $user_id);
+    }
 
 
 
