@@ -35,6 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     }
 }
 
+
 echo '<hr>';
+include __DIR__ . '/timer/index.php';
 include __DIR__ . '/tasks/index.php';
+
 ?>

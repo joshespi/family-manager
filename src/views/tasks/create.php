@@ -64,7 +64,7 @@ if (isset($_SESSION['system_message'])) {
 
 ?>
 <!-- Trigger Button -->
-<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createTaskModal">
+<button type="button" class="btn btn-primary d-inline" data-bs-toggle="modal" data-bs-target="#createTaskModal">
     Create Task
 </button>
 
