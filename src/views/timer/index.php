@@ -98,6 +98,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 parseInt(parts[4], 10), // minute
                 parseInt(parts[5], 10) // second
             ));
+            // TODO: allow user to switch timezones
             // Convert to Denver time
             const startDenver = new Date(startUTC.toLocaleString("en-US", {
                 timeZone: "America/Denver"
